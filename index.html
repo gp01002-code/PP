@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>拍馬屁大師 - 歷史典故版</title>
+    <title>拍馬屁大師 - 終極透視 Q 彈版</title>
     <style>
         :root {
             --primary-red: #d32f2f;
             --gold: #ffd700;
-            --butt-pink: #ffb6c1;
-            /* 屁屁高度調整：調高至 160px 確保對準馬兒 */
-            --butt-y-offset: 160px; 
+            /* 調整屁屁位置與大小：目前調高至 210px，縮小至 0.85 倍 */
+            --butt-y-offset: 210px; 
+            --butt-scale: 0.85;
         }
         
         * {
@@ -74,7 +74,7 @@
         .left-side { left: -60px; top: 60px; writing-mode: vertical-rl; }
         .right-side { right: -60px; top: 60px; writing-mode: vertical-rl; }
 
-        /* 馬兒圖層 */
+        /* 馬兒圖層 - 讀取 horse.png */
         .horse-layer {
             position: absolute;
             top: 100px;
@@ -88,7 +88,7 @@
             z-index: 5;
         }
 
-        /* 兩片式「蜜桃」屁屁 */
+        /* 兩片式「蜜桃」屁屁容器 */
         .butt-container {
             position: absolute;
             bottom: var(--butt-y-offset);
@@ -99,32 +99,34 @@
             justify-content: center;
             align-items: flex-end;
             cursor: pointer;
+            transform: scale(var(--butt-scale));
             transform-origin: center bottom;
         }
 
         .cheek {
             width: 105px;
             height: 130px;
-            background: radial-gradient(circle at 50% 30%, #ffc0cb 0%, #ff80ab 70%, #f06292 100%);
+            /* 改為半透明漸層 (rgba 0.75)，增加透視感 */
+            background: radial-gradient(circle at 50% 30%, rgba(255,192,203,0.7) 0%, rgba(255,128,171,0.75) 60%, rgba(240,98,146,0.8) 100%);
             box-shadow: 
-                0 15px 30px rgba(0,0,0,0.4),
-                inset 0 -10px 20px rgba(0,0,0,0.1),
-                inset 0 10px 15px rgba(255,255,255,0.4);
+                0 10px 20px rgba(0,0,0,0.3),
+                inset 0 -5px 15px rgba(0,0,0,0.1),
+                inset 0 8px 10px rgba(255,255,255,0.4);
             transition: transform 0.1s;
         }
 
-        .cheek.left { border-radius: 65% 35% 35% 65%; transform: rotate(-10deg) translateX(8px); }
-        .cheek.right { border-radius: 35% 65% 65% 35%; transform: rotate(10deg) translateX(-8px); }
+        .cheek.left { border-radius: 65% 35% 35% 65%; transform: rotate(-8deg) translateX(10px); }
+        .cheek.right { border-radius: 35% 65% 65% 35%; transform: rotate(8deg) translateX(-10px); }
 
         @keyframes jelly-bounce {
-            0% { transform: scale(1, 1); }
-            20% { transform: scale(1.4, 0.6); }
-            45% { transform: scale(0.9, 1.25); }
-            100% { transform: scale(1, 1); }
+            0% { transform: scale(var(--butt-scale), var(--butt-scale)); }
+            20% { transform: scale(calc(var(--butt-scale) * 1.4), calc(var(--butt-scale) * 0.7)); }
+            45% { transform: scale(calc(var(--butt-scale) * 0.9), calc(var(--butt-scale) * 1.2)); }
+            100% { transform: scale(var(--butt-scale), var(--butt-scale)); }
         }
         .jelly-active { animation: jelly-bounce 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
 
-        /* 極簡浮空計分 */
+        /* 浮空計分 */
         .score-display {
             position: absolute;
             bottom: 20px;
