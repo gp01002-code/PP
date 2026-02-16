@@ -8,6 +8,8 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- 引入 Google Fonts 用於補足行動裝置缺失的古典美感字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-red: #d32f2f;
@@ -19,9 +21,9 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* 全域強制標楷體 */
+        /* 強化字體設定：標楷體優先，iOS Kaiti 次之，Android 使用古典宋體回退 */
         body, .couplet, .score-display, .modal, .historical-story, .lotto-btn, button, .fortune-container {
-            font-family: "標楷體", "DFKai-SB", "Kaiti TC", serif;
+            font-family: "標楷體", "DFKai-SB", "BiauKai", "Kaiti TC", "Kaiti SC", "Kaiti", "Noto Serif TC", serif;
         }
 
         body {
@@ -57,7 +59,6 @@
             background-color: transparent;
         }
 
-        /* 受擊震動 */
         @keyframes container-vibrate {
             0% { transform: scale(1); }
             50% { transform: scale(0.985) translate(1.5px, 1.5px); }
@@ -118,7 +119,7 @@
             .left-side, .right-side { top: 75px; }
         }
 
-        /* 計分板 */
+        /* 浮空計分板 */
         .score-display {
             position: absolute;
             bottom: 25px;
@@ -132,7 +133,7 @@
         }
         #score-num { font-size: 3rem; color: #fff; display: block; line-height: 1.2; margin-top: 5px; }
 
-        /* 按鈕 */
+        /* 領取按鈕 */
         .lotto-btn {
             position: absolute;
             bottom: 125px;
@@ -143,6 +144,7 @@
             border: 2px solid #8b0000;
             border-radius: 25px;
             font-weight: 900;
+            font-size: 1.1rem;
             cursor: pointer;
             display: none;
             z-index: 30;
@@ -177,7 +179,7 @@
             max-width: 340px;
         }
 
-        /* 縮小密碼球排版，確保六個球一列 */
+        /* 縮小密碼球，確保漢字能在一列顯示 */
         .lucky-num-box {
             display: flex;
             justify-content: center;
@@ -188,17 +190,17 @@
         .lucky-num {
             background: radial-gradient(circle at 30% 30%, #fff, #ffd700);
             color: #8b0000;
-            width: 38px; /* 再次縮小確保手機一列 */
+            width: 38px; 
             height: 38px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 0.85rem; /* 漢字較寬，縮小字體 */
+            font-size: 0.8rem; /* 進一步縮小字體以塞進小球 */
             box-shadow: 0 0 8px rgba(255,215,0,0.6);
         }
-        /* 特別號換行，但圓圈大小與其他一致 */
+        /* 特別號換行 */
         .special-container {
             flex-basis: 100%;
             margin-top: 10px;
@@ -266,7 +268,7 @@
         <button id="lottoBtn" class="lotto-btn" onclick="showFortune()">領取運勢指引</button>
     </div>
 
-    <!-- 幸運運勢彈窗 (已移除標題燈籠) -->
+    <!-- 幸運運勢彈窗 -->
     <div id="lottoModal" class="modal">
         <h2 style="font-size: 2.2rem; color: var(--gold); margin: 10px 0;">拍馬顯靈．馬年大吉</h2>
         
@@ -283,6 +285,7 @@
             <span id="storyContent"></span>
         </div>
 
+        <!-- 點擊後重新開始遊戲 -->
         <button onclick="resetGame()" style="margin-top:20px; padding:15px 60px; border-radius:35px; background:var(--primary-red); color:white; border:2px solid var(--gold); font-weight:bold; font-size:1.3rem; cursor:pointer;">謝大師指點</button>
     </div>
 
@@ -291,12 +294,12 @@
         let score = 0;
         const buttSensors = []; 
 
-        // 數字轉漢字輔助：支援正式版(財氣用)與縮寫版(密碼球用)
+        // 漢字數字轉換邏輯
         function toChineseNum(num, isCompact = false) {
             if (num === 0) return "零";
             const chnNumChar = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
             
-            // 縮寫邏輯：21 -> 二一
+            // 縮寫版 (密碼球用)：21 -> 二一
             if (isCompact && num >= 10) {
                 let tens = Math.floor(num / 10);
                 let units = num % 10;
@@ -305,12 +308,10 @@
                 return chnNumChar[num];
             }
 
-            // 正式版邏輯：123 -> 一百二三 (適用於累積財氣)
+            // 正式版 (財氣計分用)
             const chnUnitChar = ["", "十", "百", "千"];
             let chnStr = '', unitPos = 0, zero = true;
-            
             if (num < 20 && num >= 10) return "十" + (num % 10 === 0 ? "" : chnNumChar[num % 10]);
-
             let tempNum = num;
             while (tempNum > 0) {
                 let v = tempNum % 10;
@@ -480,7 +481,7 @@
             nums.sort((a,b)=>a-b).forEach(n => {
                 const div = document.createElement('div');
                 div.className = 'lucky-num';
-                div.innerText = toChineseNum(n, true); // 縮寫版：二一
+                div.innerText = toChineseNum(n, true); 
                 box.appendChild(div);
             });
 
@@ -502,6 +503,7 @@
             document.getElementById('storyContent').innerText = story.content;
         }
 
+        // 重新開始邏輯
         function resetGame() {
             score = 0;
             document.getElementById('score-num').innerText = "零";
