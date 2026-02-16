@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>拍馬屁大師 - 純淨背景版</title>
+    <title>拍馬屁大師 - 歷史典故版</title>
     <style>
         :root {
             --primary-red: #d32f2f;
             --gold: #ffd700;
             --butt-pink: #ffb6c1;
-            /* 調整這裡來微調屁屁在馬身上的位置 */
-            --butt-y-offset: 80px; 
+            /* 屁屁高度調整：調高至 160px 確保對準馬兒 */
+            --butt-y-offset: 160px; 
         }
         
         * {
@@ -40,7 +40,6 @@
             background-image: url('door.jpg'); 
             background-size: cover;
             background-position: center;
-            /* 移除門框邊界，讓門圖更完整 */
             border-radius: 8px;
             display: flex;
             flex-direction: column;
@@ -49,10 +48,9 @@
             transition: transform 0.1s;
         }
 
-        /* 門板受擊震動 */
         @keyframes door-vibration {
             0% { transform: scale(1); }
-            50% { transform: scale(0.98) translate(1px, 1px); }
+            50% { transform: scale(0.99) translate(1px, 1px); }
             100% { transform: scale(1); }
         }
         .vibrate { animation: door-vibration 0.1s ease-out; }
@@ -76,7 +74,7 @@
         .left-side { left: -60px; top: 60px; writing-mode: vertical-rl; }
         .right-side { right: -60px; top: 60px; writing-mode: vertical-rl; }
 
-        /* 馬兒圖層 - 移除了背景色與邊框 */
+        /* 馬兒圖層 */
         .horse-layer {
             position: absolute;
             top: 100px;
@@ -86,11 +84,11 @@
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
-            pointer-events: none; /* 讓點擊穿透到屁屁 */
+            pointer-events: none;
             z-index: 5;
         }
 
-        /* 兩片式「蜜桃」屁屁容器 */
+        /* 兩片式「蜜桃」屁屁 */
         .butt-container {
             position: absolute;
             bottom: var(--butt-y-offset);
@@ -115,17 +113,9 @@
             transition: transform 0.1s;
         }
 
-        .cheek.left {
-            border-radius: 65% 35% 35% 65%;
-            transform: rotate(-10deg) translateX(8px);
-        }
+        .cheek.left { border-radius: 65% 35% 35% 65%; transform: rotate(-10deg) translateX(8px); }
+        .cheek.right { border-radius: 35% 65% 65% 35%; transform: rotate(10deg) translateX(-8px); }
 
-        .cheek.right {
-            border-radius: 35% 65% 65% 35%;
-            transform: rotate(10deg) translateX(-8px);
-        }
-
-        /* Q 彈動畫 */
         @keyframes jelly-bounce {
             0% { transform: scale(1, 1); }
             20% { transform: scale(1.4, 0.6); }
@@ -134,12 +124,31 @@
         }
         .jelly-active { animation: jelly-bounce 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
 
-        /* 隱藏式明牌按鈕 - 只有在解鎖時出現在右下角 */
-        .lotto-btn {
+        /* 極簡浮空計分 */
+        .score-display {
             position: absolute;
             bottom: 20px;
-            right: 20px;
-            padding: 10px 20px;
+            color: var(--gold);
+            text-align: center;
+            z-index: 25;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-shadow: 2px 2px 5px rgba(0,0,0,1), 0 0 10px rgba(211,47,47,0.8);
+            pointer-events: none;
+        }
+        #score-num {
+            display: block;
+            font-size: 3.5rem;
+            color: #fff;
+            margin-top: -5px;
+        }
+
+        /* 明牌按鈕 */
+        .lotto-btn {
+            position: absolute;
+            bottom: 125px;
+            right: 15px;
+            padding: 10px 18px;
             background: linear-gradient(to bottom, #ffd700, #ffa000);
             color: #8b0000;
             border: 2px solid #8b0000;
@@ -149,9 +158,60 @@
             display: none;
             z-index: 30;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        /* 彈窗樣式 */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.96);
+            z-index: 1000;
+            display: none;
+            justify-content: flex-start;
+            align-items: center;
+            flex-direction: column;
+            color: var(--gold);
+            padding: 40px 20px;
+            overflow-y: auto;
+        }
+        .ball-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 20px 0; }
+        .ball {
+            width: 52px; height: 52px; background: radial-gradient(circle at 30% 30%, #fff, #ffd700);
+            border-radius: 50%; color: #8b0000; display: flex; justify-content: center;
+            align-items: center; font-size: 1.5rem; font-weight: bold;
+            box-shadow: 0 5px 15px rgba(255,215,0,0.4);
+            animation: ball-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes ball-pop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* 典故顯示區 */
+        .historical-story {
+            background: rgba(211, 47, 47, 0.2);
+            border: 1px solid var(--gold);
+            padding: 20px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 320px;
+            margin: 15px 0;
+            text-align: left;
+            font-size: 0.95rem;
+            color: #f5e6d3;
+            line-height: 1.6;
+        }
+        .story-title { color: var(--gold); font-weight: bold; margin-bottom: 8px; font-size: 1.1rem; border-bottom: 1px solid var(--gold); padding-bottom: 5px; }
+        .story-verse { font-style: italic; color: #fff; margin-top: 10px; text-align: center; display: block; }
+
+        .lotto-info {
+            font-size: 0.85rem;
+            color: #aaa;
+            max-width: 320px;
+            margin-top: 10px;
+            border-top: 1px solid rgba(255,215,0,0.2);
+            padding-top: 15px;
         }
 
-        /* 漂浮文字 */
         .float-text {
             position: absolute;
             font-weight: 900;
@@ -165,34 +225,30 @@
             25% { opacity: 1; }
             100% { transform: translateY(-160px) scale(1.8); opacity: 0; }
         }
-
-        /* 號碼彈窗 */
-        .modal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
-            z-index: 1000;
-            display: none;
-            justify-content: center; align-items: center;
-            flex-direction: column; color: var(--gold);
-            padding: 20px;
-        }
-        .ball-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 25px; }
-        .ball {
-            width: 55px; height: 55px; background: radial-gradient(circle at 30% 30%, #fff, #ffd700);
-            border-radius: 50%; color: #8b0000; display: flex; justify-content: center;
-            align-items: center; font-size: 1.6rem; font-weight: bold;
-            box-shadow: 0 5px 15px rgba(255,215,0,0.4);
-            animation: ball-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
     </style>
 </head>
 <body>
 
+    <!-- 幸運彈窗 -->
     <div id="lottoModal" class="modal">
-        <h2 style="font-size: 2rem;">🏮 財氣顯靈．開出明牌 🏮</h2>
+        <h2 style="font-size: 2rem; margin-bottom: 5px; color: var(--gold);">🏮 拍馬神算．財氣顯靈 🏮</h2>
+        <h3 id="lottoName" style="color: #fff; margin: 5px 0; font-size: 1.2rem;"></h3>
+        
         <div id="ballContainer" class="ball-container"></div>
-        <button onclick="document.getElementById('lottoModal').style.display='none'" style="padding:12px 40px; border-radius:10px; background:var(--primary-red); color:white; border:2px solid var(--gold); cursor:pointer; font-weight:bold;">收下明牌</button>
+        
+        <!-- 隨機歷史典故 -->
+        <div id="storyBox" class="historical-story">
+            <div id="storyTitle" class="story-title"></div>
+            <div id="storyContent"></div>
+            <span id="storyVerse" class="story-verse"></span>
+        </div>
+
+        <div class="lotto-info">
+            <strong>【統計推論原理】</strong><br>
+            此號碼由「拍馬能量」結合當下毫秒時序之隨機熵值，模擬台灣彩券歷史中獎頻率推論而成。僅供趣味購買參考，請理性投注。
+        </div>
+
+        <button onclick="document.getElementById('lottoModal').style.display='none'" style="margin-top:20px; padding:12px 50px; border-radius:30px; background:var(--primary-red); color:white; border:2px solid var(--gold); cursor:pointer; font-weight:bold; font-size:1.1rem;">謝大師賜教</button>
     </div>
 
     <div id="door" class="door-scene">
@@ -201,7 +257,7 @@
         <div class="couplet left-side">拍左邊有 Money</div>
         <div class="couplet right-side">拍右邊就 Lucky</div>
 
-        <!-- 馬兒圖層 (透明底) -->
+        <!-- 馬兒圖層 -->
         <div class="horse-layer"></div>
 
         <!-- 屁屁互動區 -->
@@ -210,15 +266,35 @@
             <div class="cheek right"></div>
         </div>
 
-        <!-- 隱藏按鈕 -->
-        <button id="lottoBtn" class="lotto-btn" onclick="showLotto()">領取明牌</button>
+        <!-- 浮空計分 -->
+        <div class="score-display">
+            累積財氣
+            <span id="score-num">0</span>
+        </div>
+
+        <!-- 領取按鈕 -->
+        <button id="lottoBtn" class="lotto-btn" onclick="showLotto()">領取幸運明牌</button>
     </div>
 
     <script>
         const target = document.getElementById('patTarget');
         const lottoBtn = document.getElementById('lottoBtn');
+        const scoreDisplay = document.getElementById('score-num');
         const door = document.getElementById('door');
         let score = 0;
+
+        // 歷史典故資料庫
+        const clappingStories = [
+            { title: "南唐．李嘉明拍馬屁", content: "李嘉明與侍從見皇帝欲取魚，技藝精湛卻不親自動手，藉此將功勞與機會讓與皇后與近臣，引導風向深得恩寵。", verse: "「王者之王與龍，魚與龍更是不同。」" },
+            { title: "唐末．杜迅巧思昇華", content: "杜迅於洛陽尋得良機，見朱溫登基之勢，將生死昇華為天意，讓帝王深感自己受天命眷顧，帶來繁榮昌盛。", verse: "「當日月星辰流轉，朱文之歌響徹雲霄。」" },
+            { title: "明初．朱元璋葬禮", content: "朱元璋葬禮時狂風暴雨，有人妙語解圍，稱此乃天地同悲，如來佛祖與菩薩親自相迎，化悲傷為吉兆。", verse: "「西方的佛，同名的佛，雷雨伴隨天際。」" },
+            { title: "明初．裕濟寺題詩", content: "朱元璋在寺廟牆上題詩遭清洗後大怒，僧侶官員以『法水輕洗，猶由龍光』巧辯，稱不敢留聖蹤於凡塵。", verse: "「聖上題詩不過桿，謹將法水輕洗龍光。」" },
+            { title: "明末．王赤之才", content: "王赤才華橫溢生不逢時，其《大師表》被朱元璋看中後立即獲封。馬屁精髓在於點出君王心中最在意的江南春色。", verse: "「吹落西風的人，乾坤無處不生塵。」" },
+            { title: "唐中宗．馬屁讚頌", content: "中宗宴會上，大臣李老以『外在，內裡無所不能』讚頌皇室力量，將馬屁化作牛氣沖天，使君王轉怒為笑。", verse: "「當波濤過後，我愛你。」" },
+            { title: "清乾隆．阮元眼鏡詩", content: "阮元得知乾隆不戴眼鏡實為明君之眼，以《眼鏡》詩讚頌君王目光銳利。乾隆大悅，賜其官運平步青雲。", verse: "「猶由瞳功能完成，標誌著順君的征服。」" },
+            { title: "清乾隆．高宗舊事", content: "乾隆時期官員位居高位，臣子以『高宗居第八季，臣子蒙眼賞賜』表達對聖恩的深厚感激與無限崇拜。", verse: "「語言中飽含深情的表達。」" },
+            { title: "南北朝．日月光天德", content: "隋文帝入芒山，侍從以絕妙詩句讚美天下太平不再，願以此書表達對上蒼德行的敬意，轉瞬間改變命運。", verse: "「日月光天德，山河莊帝府。」" }
+        ];
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSound() {
@@ -237,11 +313,10 @@
         function onPat(e) {
             if (e.cancelable) e.preventDefault();
             playSound();
-            
             const gain = Math.floor(Math.random() * 10) + 1;
             score += gain;
+            scoreDisplay.innerText = score;
 
-            // 累積到 300 財氣隱藏按鈕出現
             if (score >= 300) lottoBtn.style.display = 'block';
 
             target.classList.remove('jelly-active');
@@ -256,9 +331,7 @@
             const y = e.clientY || (e.touches ? e.touches[0].clientY : 0);
             const rect = target.getBoundingClientRect();
             const isLeft = (x - rect.left) < rect.width / 2;
-            
             createFloat(x, y, isLeft ? `💰 +${gain}` : `🍀 +${gain}`, isLeft ? "gold" : "#00ff88");
-
             if (navigator.vibrate) navigator.vibrate(45);
         }
 
@@ -276,21 +349,66 @@
 
         function showLotto() {
             const container = document.getElementById('ballContainer');
+            const nameEl = document.getElementById('lottoName');
+            const storyTitle = document.getElementById('storyTitle');
+            const storyContent = document.getElementById('storyContent');
+            const storyVerse = document.getElementById('storyVerse');
+            
             container.innerHTML = '';
             document.getElementById('lottoModal').style.display = 'flex';
-            let nums = [];
-            while(nums.length < 6) {
-                const n = Math.floor(Math.random() * 49) + 1;
-                if(!nums.includes(n)) nums.push(n);
+
+            // 1. 決定樂透類型
+            const seed = score + new Date().getSeconds();
+            const lottoType = seed % 2 === 0 ? "BIG" : "POWER";
+            let mainNums = [];
+            let specialNum = null;
+
+            if (lottoType === "BIG") {
+                nameEl.innerText = "✨ 大樂透 (6/49) 幸運推論 ✨";
+                while(mainNums.length < 6) {
+                    const n = Math.floor(Math.random() * 49) + 1;
+                    if(!mainNums.includes(n)) mainNums.push(n);
+                }
+            } else {
+                nameEl.innerText = "🔥 威力彩 (6/38 + 第2區) 推論 🔥";
+                while(mainNums.length < 6) {
+                    const n = Math.floor(Math.random() * 38) + 1;
+                    if(!mainNums.includes(n)) mainNums.push(n);
+                }
+                specialNum = Math.floor(Math.random() * 8) + 1;
             }
-            nums.sort((a,b) => a-b).forEach((n, i) => {
+
+            mainNums.sort((a,b) => a-b).forEach((n, i) => {
                 setTimeout(() => {
                     const b = document.createElement('div');
                     b.className = 'ball';
                     b.innerText = n < 10 ? '0' + n : n;
                     container.appendChild(b);
-                }, i * 200);
+                }, i * 150);
             });
+
+            if (specialNum !== null) {
+                setTimeout(() => {
+                    const b = document.createElement('div');
+                    b.className = 'ball';
+                    b.style.background = "radial-gradient(circle at 30% 30%, #fff, #ff4444)";
+                    b.style.color = "#fff";
+                    b.innerText = specialNum;
+                    const label = document.createElement('div');
+                    label.style.fontSize = '0.6rem';
+                    label.style.marginTop = '50px';
+                    label.style.position = 'absolute';
+                    label.innerText = "特別號";
+                    b.appendChild(label);
+                    container.appendChild(b);
+                }, 1000);
+            }
+
+            // 2. 隨機顯示一段歷史典故
+            const randomStory = clappingStories[Math.floor(Math.random() * clappingStories.length)];
+            storyTitle.innerText = randomStory.title;
+            storyContent.innerText = randomStory.content;
+            storyVerse.innerText = randomStory.verse;
         }
 
         target.addEventListener('mousedown', onPat);
