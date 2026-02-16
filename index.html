@@ -32,7 +32,7 @@
             touch-action: none;
         }
 
-        /* 門的場景容器 - 確保背景 door.jpg 可見 */
+        /* 門的場景容器 */
         #container {
             position: relative;
             width: 380px;
@@ -49,14 +49,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 讓背景圖不會被 3D 畫布完全擋住 */
+            /* 確保畫布是透明的 */
             background-color: transparent;
         }
 
-        /* 渲染震動動畫 */
+        /* 門板受擊震動 */
         @keyframes container-vibrate {
             0% { transform: scale(1); }
-            50% { transform: scale(0.995) translate(1px, 1px); }
+            50% { transform: scale(0.985) translate(2px, 2px); }
             100% { transform: scale(1); }
         }
         .vibrate { animation: container-vibrate 0.1s ease-out; }
@@ -66,7 +66,6 @@
             height: 100%;
             cursor: grab;
             z-index: 5;
-            /* 關鍵：讓畫布背景透明 */
             background: transparent !important;
         }
 
@@ -89,11 +88,6 @@
         .left-side { left: 8px; top: 70px; writing-mode: vertical-rl; }
         .right-side { right: 8px; top: 70px; writing-mode: vertical-rl; }
 
-        @media (max-width: 400px) {
-            .couplet { font-size: 0.9rem; }
-            .left-side, .right-side { top: 60px; }
-        }
-
         /* 浮空計分板 */
         .score-display {
             position: absolute;
@@ -106,12 +100,12 @@
             text-shadow: 2px 2px 5px rgba(0,0,0,1);
             pointer-events: none;
         }
-        #score-num { font-size: 3rem; color: #fff; display: block; line-height: 1; }
+        #score-num { font-size: 3.5rem; color: #fff; display: block; line-height: 1; }
 
-        /* 領取按鈕 */
+        /* 明牌按鈕 */
         .lotto-btn {
             position: absolute;
-            bottom: 110px;
+            bottom: 115px;
             right: 15px;
             padding: 10px 18px;
             background: linear-gradient(to bottom, #ffd700, #ffa000);
@@ -147,28 +141,12 @@
             width: 50px; height: 50px; background: radial-gradient(circle at 30% 30%, #fff, #ffd700);
             border-radius: 50%; color: #8b0000; display: flex; justify-content: center;
             align-items: center; font-size: 1.5rem; font-weight: bold;
-            box-shadow: 0 5px 15px rgba(255,215,0,0.4);
-            animation: ball-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-
-        .historical-story {
-            background: rgba(211, 47, 47, 0.2);
-            border: 1px solid var(--gold);
-            padding: 15px;
-            border-radius: 10px;
-            width: 100%;
-            max-width: 320px;
-            margin: 15px 0;
-            text-align: left;
-            font-size: 0.9rem;
-            color: #f5e6d3;
-            line-height: 1.5;
         }
 
         .float-text {
             position: absolute;
             font-weight: 900;
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             pointer-events: none;
             z-index: 100;
             animation: float-up 0.8s ease-out forwards;
@@ -176,8 +154,8 @@
         }
         @keyframes float-up {
             0% { transform: translateY(0) scale(0.5); opacity: 0; }
-            25% { opacity: 1; }
-            100% { transform: translateY(-160px) scale(1.6) rotate(10deg); opacity: 0; }
+            20% { opacity: 1; }
+            100% { transform: translateY(-180px) scale(1.8) rotate(10deg); opacity: 0; }
         }
     </style>
 </head>
@@ -188,7 +166,6 @@
         <div class="couplet left-side">拍左邊有 Money</div>
         <div class="couplet right-side">拍右邊就 Lucky</div>
 
-        <!-- 3D 畫布容器 -->
         <div id="three-canvas"></div>
 
         <div class="score-display">
@@ -199,62 +176,47 @@
         <button id="lottoBtn" class="lotto-btn" onclick="showLotto()">領取明牌</button>
     </div>
 
+    <!-- 幸運彈窗 -->
     <div id="lottoModal" class="modal">
         <h2 style="font-size: 1.8rem; color: var(--gold);">🏮 3D 神算．明牌顯靈 🏮</h2>
         <h3 id="lottoName" style="color: #fff; margin: 10px 0;"></h3>
         <div id="ballContainer" class="ball-container"></div>
-        
-        <div id="storyBox" class="historical-story">
-            <b id="storyTitle" style="color:var(--gold); font-size:1.1rem; border-bottom: 1px solid var(--gold); display:block; padding-bottom:5px; margin-bottom:10px;"></b>
+        <div id="storyBox" style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin: 15px 0; text-align: left; font-size: 0.9rem; max-width: 320px;">
+            <b id="storyTitle" style="color:var(--gold)"></b><br>
             <span id="storyContent"></span>
         </div>
-
-        <div style="font-size: 0.8rem; color: #aaa; margin-top: 10px; max-width: 300px;">
-            <strong>【統計推論原理】</strong><br>
-            此號碼由「拍馬能量」結合當下毫秒時序之隨機熵值，模擬台灣彩券歷史中獎頻率推論而成。僅供趣味購買參考。
-        </div>
-
-        <button onclick="document.getElementById('lottoModal').style.display='none'" style="margin-top:20px; padding:12px 50px; border-radius:30px; background:var(--primary-red); color:white; border:2px solid var(--gold); font-weight:bold; cursor:pointer;">謝大師賜教</button>
+        <button onclick="document.getElementById('lottoModal').style.display='none'" style="margin-top:20px; padding:12px 50px; border-radius:30px; background:var(--primary-red); color:white; border:2px solid var(--gold); font-weight:bold;">謝大師賜教</button>
     </div>
 
     <script>
         let scene, camera, renderer, controls, horseModel, raycaster, mouse;
         let score = 0;
-        const buttMeshes = []; // 打擊偵測球
+        const buttMeshes = []; 
 
         const clappingStories = [
-            { title: "南唐．李嘉明拍馬屁", content: "李嘉明與侍從見皇帝欲取魚，技藝精湛卻不親自動手，藉此將功勞與機會讓與皇后與近臣，引導風向深得恩寵。語出：「王者之王與龍，魚與龍更是不同。」" },
-            { title: "唐末．杜迅巧思昇華", content: "杜迅見朱溫登基之勢，將生死昇華為天意，讓帝王深感自己受天命眷顧，帶來繁榮昌盛。語出：「當日月星辰流轉，朱文之歌響徹雲霄。」" },
-            { title: "明初．朱元璋葬禮", content: "朱元璋葬禮時狂風暴雨，有人妙語解圍，稱此乃天地同悲，如來佛祖與菩薩親自相迎，化悲傷為吉兆。語出：「西方的佛，同名的佛，雷雨伴隨天際。」" },
-            { title: "明初．裕濟寺題詩", content: "朱元璋題詩遭清洗大怒，官員以『法水輕洗，猶由龍光』巧辯，稱不敢留聖蹤於凡塵。語出：「聖上題詩不過桿，謹將法水輕洗龍光。」" },
-            { title: "明末．王赤之才", content: "王赤才華橫溢卻不幸。後來朱元璋看中其作品，立即獲任命為官，馬屁精髓在於點出君王心中江南春。語出：「吹落西風的人，乾坤無處不生塵。」" },
-            { title: "唐中宗．李老讚頌", content: "大臣李老以『外在，內裡無所不能』讚頌，將馬屁化作牛氣沖天，使君王轉怒為笑。語出：「當波濤過後，我愛你。」" },
-            { title: "清乾隆．阮元眼鏡詩", content: "阮元得知乾隆不戴眼鏡實為明君之眼，以此詩讚頌目光銳利。乾隆大悅，賜其官運平步青雲。語出：「猶由瞳功能完成，標誌著順君的征服。」" },
-            { title: "清乾隆．高宗舊事", content: "乾隆時期官員位居高位，臣子以『高宗居第八季，臣子蒙眼賞賜』表達對聖恩的深厚感激。語出：「語言中飽含深情的表達。」" },
-            { title: "南北朝．日月光天德", content: "侍從以絕妙詩句讚美隋文帝，轉瞬間改變命運。語出：「日月光天德，山河莊帝府。太平不再，願上東之書。」" }
+            { title: "南唐．李嘉明拍馬屁", content: "李嘉明見皇帝欲取魚，技藝精湛卻不親手抓，藉此將恩寵讓與近臣，引導風向。語出：「王者之王與龍，魚與龍更是不同。」" },
+            { title: "清乾隆．阮元眼鏡詩", content: "阮元得知乾隆不戴眼鏡實為明君，以此詩讚頌目光銳利。乾隆大悅，賜其官運平步青雲。語出：「猶由瞳功能完成，標誌著順君的征服。」" },
+            { title: "明初．朱元璋葬禮", content: "葬禮時狂風暴雨，有人妙語稱此乃天地同悲，如來佛祖親自相迎，化悲傷為吉兆。語出：「西方的佛，同名的佛。」" }
         ];
 
         function init() {
-            const container = document.getElementById('three-canvas');
+            const canvasWrapper = document.getElementById('three-canvas');
             scene = new THREE.Scene();
             
-            // 重要：不設定場景背景顏色，保持透明
-            
-            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera = new THREE.PerspectiveCamera(45, canvasWrapper.clientWidth / canvasWrapper.clientHeight, 0.1, 1000);
             camera.position.set(0, 0.2, 5);
 
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); // alpha: true 啟用透明度
-            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); 
+            renderer.setSize(canvasWrapper.clientWidth, canvasWrapper.clientHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.setClearColor(0x000000, 0); // 設定清除色為完全透明
-            container.appendChild(renderer.domElement);
+            renderer.setClearColor(0x000000, 0); 
+            canvasWrapper.appendChild(renderer.domElement);
 
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
-            controls.autoRotate = false; // 關閉自動旋轉方便玩家對準
 
-            scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-            const sun = new THREE.DirectionalLight(0xffffff, 1);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+            const sun = new THREE.DirectionalLight(0xffffff, 0.8);
             sun.position.set(5, 10, 5);
             scene.add(sun);
 
@@ -271,16 +233,19 @@
             loader.load(modelUrl, function(gltf) {
                 horseModel = gltf.scene;
                 
-                // 找到馬的模型後，手動添加兩個「打擊感應球」在屁股位置
+                // --- 修正屁屁位置：根據你的截圖，馬頭朝右前，屁股應該在左後方 ---
                 createButtSensors();
                 
-                // 自動置中與適度放大
                 const box = new THREE.Box3().setFromObject(horseModel);
                 const center = box.getCenter(new THREE.Vector3());
                 horseModel.position.sub(center);
                 scene.add(horseModel);
+                
+                // 初始馬兒角度稍微轉向側邊
+                horseModel.rotation.y = -Math.PI / 4; 
+                
             }, undefined, function(error) {
-                console.error("載入模型失敗:", error);
+                console.error("載入失敗:", error);
                 createFallbackHorse();
             });
 
@@ -289,41 +254,35 @@
             animate();
         }
 
-        /**
-         * 建立隱形的打擊感應器（解決模型內零件名稱不統一的問題）
-         */
         function createButtSensors() {
-            // 建立一個透明度極高的球體材質
+            // 感應球材質：隱約可見的白色閃光
             const sensorMat = new THREE.MeshPhongMaterial({
                 color: 0xffffff,
                 transparent: true,
-                opacity: 0.1, // 隱約可見
-                shininess: 100
+                opacity: 0.15, // 調高一點點讓你比較好對準測試
+                shininess: 150
             });
             
-            const sensorGeo = new THREE.SphereGeometry(0.5, 32, 32);
+            const sensorGeo = new THREE.SphereGeometry(0.55, 32, 32);
 
-            // 左屁屁感應球 (相對於馬的模型中心)
+            // --- 座標更新：X 為負(左)，Z 為負(後) ---
+            // 左屁屁
             const leftSensor = new THREE.Mesh(sensorGeo, sensorMat);
-            leftSensor.position.set(-0.4, 0.4, 0.8); // 這裡的座標可以手動微調
-            leftSensor.name = "butt_sensor";
+            leftSensor.position.set(-0.5, 0.6, -1.0); 
+            leftSensor.name = "butt_sensor_left";
             horseModel.add(leftSensor);
             buttMeshes.push(leftSensor);
 
-            // 右屁屁感應球
+            // 右屁屁
             const rightSensor = new THREE.Mesh(sensorGeo, sensorMat);
-            rightSensor.position.set(0.4, 0.4, 0.8);
-            rightSensor.name = "butt_sensor";
+            rightSensor.position.set(-0.2, 0.6, -1.2); 
+            rightSensor.name = "butt_sensor_right";
             horseModel.add(rightSensor);
             buttMeshes.push(rightSensor);
         }
 
         function createFallbackHorse() {
-            // 如果 GLB 讀取失敗，畫一個盒子馬代替
             horseModel = new THREE.Group();
-            const mat = new THREE.MeshPhongMaterial({color: 0x8b4513});
-            const body = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1, 2), mat);
-            horseModel.add(body);
             createButtSensors();
             scene.add(horseModel);
         }
@@ -338,7 +297,6 @@
 
             if (intersects.length > 0) {
                 const hit = intersects[0].object;
-                // 如果點擊到模型內任何名稱含 "butt" 的零件或是我們建立的感應球
                 if (hit.name.toLowerCase().includes("butt")) {
                     onPatSuccess(hit, event.clientX, event.clientY);
                 }
@@ -349,24 +307,25 @@
             const gain = Math.floor(Math.random() * 10) + 1;
             score += gain;
             document.getElementById('score-num').innerText = score;
-            if (score >= 300) document.getElementById('lottoBtn').style.display = 'block';
+            if (score >= 200) document.getElementById('lottoBtn').style.display = 'block';
 
-            // Q 彈動畫 (對感應球進行縮放)
-            mesh.scale.set(1.4, 0.6, 1.4);
-            setTimeout(() => mesh.scale.set(1, 1, 1), 100);
+            // --- 強力 3D 動畫：壓扁再回彈 ---
+            mesh.scale.set(1.5, 0.5, 1.5);
+            setTimeout(() => {
+                mesh.scale.set(0.9, 1.1, 0.9); // 反彈拉長
+                setTimeout(() => mesh.scale.set(1, 1, 1), 100);
+            }, 100);
 
-            // 門板震動
+            // 門板震動特效
             const doorContainer = document.getElementById('container');
             doorContainer.classList.remove('vibrate');
             void doorContainer.offsetWidth;
             doorContainer.classList.add('vibrate');
 
             // 浮空文字
-            const isLeft = x < window.innerWidth / 2;
-            createFloatText(x, y, isLeft ? `💰 +${gain}` : `🍀 +${gain}`);
+            createFloatText(x, y, x < window.innerWidth/2 ? `💰 +${gain}` : `🍀 +${gain}`);
 
-            // 震動與音效
-            if (navigator.vibrate) navigator.vibrate(40);
+            if (navigator.vibrate) navigator.vibrate(50);
             playPatSound();
         }
 
@@ -374,9 +333,9 @@
             const actx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = actx.createOscillator();
             const g = actx.createGain();
-            osc.frequency.setValueAtTime(220, actx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(60, actx.currentTime + 0.1);
-            g.gain.setValueAtTime(0.4, actx.currentTime);
+            osc.frequency.setValueAtTime(240, actx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(80, actx.currentTime + 0.1);
+            g.gain.setValueAtTime(0.5, actx.currentTime);
             g.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.1);
             osc.connect(g); g.connect(actx.destination);
             osc.start(); osc.stop(actx.currentTime + 0.1);
@@ -386,8 +345,8 @@
             const div = document.createElement('div');
             div.className = 'float-text';
             div.innerText = txt;
-            div.style.left = (x - 40) + 'px';
-            div.style.top = (y - 40) + 'px';
+            div.style.left = (x - 50) + 'px';
+            div.style.top = (y - 50) + 'px';
             div.style.color = txt.includes("💰") ? "gold" : "#00ff88";
             document.body.appendChild(div);
             setTimeout(() => div.remove(), 800);
@@ -397,26 +356,19 @@
             const container = document.getElementById('ballContainer');
             container.innerHTML = '';
             document.getElementById('lottoModal').style.display = 'flex';
-            
-            const seed = score + new Date().getSeconds();
-            const isBig = seed % 2 === 0;
-            document.getElementById('lottoName').innerText = isBig ? "✨ 大樂透 (6/49) 推論 ✨" : "🔥 威力彩 (6/38 + 第2區) 推論 🔥";
-
+            const isBig = Math.random() > 0.5;
+            document.getElementById('lottoName').innerText = isBig ? "✨ 大樂透 推論 ✨" : "🔥 威力彩 推論 🔥";
             let nums = [];
-            let max = isBig ? 49 : 38;
             while(nums.length < 6) {
-                let n = Math.floor(Math.random() * max) + 1;
+                let n = Math.floor(Math.random() * (isBig ? 49 : 38)) + 1;
                 if(!nums.includes(n)) nums.push(n);
             }
-            nums.sort((a,b)=>a-b).forEach((n, i) => {
-                setTimeout(() => {
-                    const b = document.createElement('div');
-                    b.className = 'ball';
-                    b.innerText = n < 10 ? '0' + n : n;
-                    container.appendChild(b);
-                }, i * 150);
+            nums.sort((a,b)=>a-b).forEach(n => {
+                const b = document.createElement('div');
+                b.className = 'ball';
+                b.innerText = n < 10 ? '0'+n : n;
+                container.appendChild(b);
             });
-
             const story = clappingStories[Math.floor(Math.random() * clappingStories.length)];
             document.getElementById('storyTitle').innerText = story.title;
             document.getElementById('storyContent').innerText = story.content;
