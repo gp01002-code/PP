@@ -19,11 +19,15 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* 全域標楷體設定 */
+        body, .couplet, .score-display, .modal, .historical-story, .lotto-btn, button {
+            font-family: "標楷體", "DFKai-SB", "Kaiti TC", serif;
+        }
+
         body {
             margin: 0;
             padding: 0;
             background-color: #f5e6d3;
-            font-family: "Microsoft JhengHei", sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -32,14 +36,13 @@
             touch-action: none;
         }
 
-        /* 門的場景容器 - 確保 door.jpg 顯示在最底層 */
+        /* 門的場景容器 */
         #container {
             position: relative;
             width: 380px;
             height: 620px;
             max-width: 95vw;
             max-height: 92vh;
-            /* 載入你的背景圖 */
             background-image: url('door.jpg'); 
             background-size: cover;
             background-position: center;
@@ -51,9 +54,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            background-color: transparent;
         }
 
-        /* 門板震動特效 */
         @keyframes container-vibrate {
             0% { transform: scale(1); }
             50% { transform: scale(0.98) translate(2px, 2px); }
@@ -61,7 +64,7 @@
         }
         .vibrate { animation: container-vibrate 0.12s ease-out; }
 
-        /* 3D 渲染區域 - 設定為絕對定位覆蓋在背景之上 */
+        /* 3D 渲染區域 */
         #three-canvas {
             position: absolute;
             top: 0;
@@ -70,6 +73,7 @@
             height: 100%;
             cursor: grab;
             z-index: 5;
+            background: transparent !important;
         }
 
         /* 春聯樣式 */
@@ -145,7 +149,6 @@
             text-align: center;
         }
 
-        /* 運勢顯示區 */
         .fortune-container {
             background: rgba(255, 215, 0, 0.1);
             border: 2px solid var(--gold);
@@ -156,11 +159,26 @@
             max-width: 330px;
         }
 
-        .lucky-item {
-            font-size: 1.5rem;
+        .lucky-item-box {
+            font-size: 1.6rem;
             color: #fff;
-            margin: 10px 0;
-            display: block;
+            margin: 15px 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .lucky-num {
+            background: radial-gradient(circle at 30% 30%, #fff, #ffd700);
+            color: #8b0000;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 0 10px gold;
         }
 
         .historical-story {
@@ -186,7 +204,6 @@
         }
         @keyframes float-up {
             0% { transform: translateY(0) scale(0.5); opacity: 0; }
-            20% { opacity: 1; }
             100% { transform: translateY(-180px) scale(1.8) rotate(10deg); opacity: 0; }
         }
     </style>
@@ -194,7 +211,6 @@
 <body>
 
     <div id="container">
-        <!-- 春聯內容 -->
         <div class="couplet top-scroll">記得拍屁屁</div>
         <div class="couplet left-side">拍左邊有 Money</div>
         <div class="couplet right-side">拍右邊就 Lucky</div>
@@ -212,14 +228,14 @@
 
     <!-- 幸運運勢彈窗 -->
     <div id="lottoModal" class="modal">
-        <h2 style="font-size: 2rem; color: var(--gold);">🏮 拍馬顯靈．馬年大吉 🏮</h2>
+        <h2 style="font-size: 2.2rem; color: var(--gold); margin-top: 10px;">拍馬顯靈．馬年大吉</h2>
         
         <div class="fortune-container">
             <b style="color:var(--gold); font-size: 1.2rem;">✨ 馬年開運指引 ✨</b>
             <p id="fortuneTip" style="color: #fff; line-height: 1.5; margin: 15px 0;"></p>
             <hr style="border: 0.5px solid rgba(255,215,0,0.3);">
-            <b style="color:var(--gold);">🍀 本週守護小物 🍀</b>
-            <span id="luckyItem" class="lucky-item"></span>
+            <b style="color:var(--gold);">🍀 本週開運密碼 🍀</b>
+            <div id="luckyNumsBox" class="lucky-item-box"></div>
         </div>
         
         <div id="storyBox" class="historical-story">
@@ -227,7 +243,7 @@
             <span id="storyContent"></span>
         </div>
 
-        <button onclick="document.getElementById('lottoModal').style.display='none'" style="margin-top:20px; padding:12px 50px; border-radius:30px; background:var(--primary-red); color:white; border:2px solid var(--gold); font-weight:bold; cursor:pointer;">謝大師指點</button>
+        <button onclick="resetGame()" style="margin-top:20px; padding:12px 60px; border-radius:30px; background:var(--primary-red); color:white; border:2px solid var(--gold); font-weight:bold; font-size:1.2rem; cursor:pointer;">謝大師指點</button>
     </div>
 
     <script>
@@ -235,7 +251,6 @@
         let score = 0;
         const buttSensors = []; 
 
-        // 馬年運勢指引資料庫
         const horseYearTips = [
             "馬不停蹄，今年事業將有如神助，適合積極開拓新領域。",
             "龍馬精神，健康運勢極佳，建議多接觸大自然吸收正能量。",
@@ -243,10 +258,6 @@
             "馬到成功，長期堅持的計畫即將迎來收穫，切莫半途而廢。",
             "天馬行空，創意靈感爆發的時期，適合從事藝術或企劃工作。",
             "馬鳴風蕭，凡事以靜制動，在重要決策前多聽聽長輩的意見。"
-        ];
-
-        const luckyItems = [
-            "🧧 紅色錢包", "📿 黃金飾品", "🍵 綠色植栽", "💎 水晶掛件", "👟 運動跑鞋", "📜 書法真跡"
         ];
 
         const clappingStories = [
@@ -261,13 +272,12 @@
             scene = new THREE.Scene();
             
             camera = new THREE.PerspectiveCamera(45, canvasWrapper.clientWidth / canvasWrapper.clientHeight, 0.1, 1000);
-            camera.position.set(0, 0.5, 6); 
+            camera.position.set(0, 0.5, 6.5); 
 
-            // 關鍵：alpha: true 讓渲染器背景透明
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); 
             renderer.setSize(canvasWrapper.clientWidth, canvasWrapper.clientHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.setClearColor(0x000000, 0); // 確保清除色透明度為 0
+            renderer.setClearColor(0x000000, 0); 
             canvasWrapper.appendChild(renderer.domElement);
 
             controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -315,25 +325,28 @@
             animate();
         }
 
+        /**
+         * 修正屁屁位置：提高至 1.35，並調整 Z 軸座標貼近馬背
+         */
         function createButtSensors() {
             const sensorMat = new THREE.MeshPhongMaterial({
                 color: 0xffffff,
                 transparent: true,
                 opacity: 0.1, 
-                shininess: 250
+                shininess: 300
             });
             
-            const sensorGeo = new THREE.SphereGeometry(0.45, 32, 32);
+            const sensorGeo = new THREE.SphereGeometry(0.4, 32, 32);
 
-            // 調整感應球位置：提升至 1.05 處（馬背臀部）
+            // 提升高度到 1.35
             const leftSensor = new THREE.Mesh(sensorGeo, sensorMat.clone());
-            leftSensor.position.set(-0.3, 1.1, -0.35); 
+            leftSensor.position.set(-0.35, 1.35, -0.2); 
             leftSensor.name = "butt_sensor_left";
             horseModel.add(leftSensor);
             buttSensors.push(leftSensor);
 
             const rightSensor = new THREE.Mesh(sensorGeo, sensorMat.clone());
-            rightSensor.position.set(0.15, 1.1, -0.45); 
+            rightSensor.position.set(0.1, 1.35, -0.3); 
             rightSensor.name = "butt_sensor_right";
             horseModel.add(rightSensor);
             buttSensors.push(rightSensor);
@@ -361,9 +374,8 @@
             document.getElementById('score-num').innerText = score;
             if (score >= 300) document.getElementById('lottoBtn').style.display = 'block';
 
-            // 強力縮放動畫
-            mesh.scale.set(1.5, 0.5, 1.5);
-            mesh.material.opacity = 0.6;
+            mesh.scale.set(1.4, 0.6, 1.4);
+            mesh.material.opacity = 0.5;
             setTimeout(() => {
                 mesh.scale.set(1, 1, 1);
                 mesh.material.opacity = 0.1;
@@ -402,21 +414,36 @@
             setTimeout(() => div.remove(), 800);
         }
 
-        // --- 改為顯示運勢指引 ---
         function showFortune() {
             document.getElementById('lottoModal').style.display = 'flex';
+            document.getElementById('fortuneTip').innerText = horseYearTips[Math.floor(Math.random() * horseYearTips.length)];
             
-            // 隨機選取運勢與小物
-            const tip = horseYearTips[Math.floor(Math.random() * horseYearTips.length)];
-            const item = luckyItems[Math.floor(Math.random() * luckyItems.length)];
-            
-            document.getElementById('fortuneTip').innerText = tip;
-            document.getElementById('luckyItem').innerText = item;
+            // 產生神祕開運密碼
+            const box = document.getElementById('luckyNumsBox');
+            box.innerHTML = '';
+            let nums = [];
+            while(nums.length < 6) {
+                let n = Math.floor(Math.random() * 49) + 1;
+                if(!nums.includes(n)) nums.push(n);
+            }
+            nums.sort((a,b)=>a-b).forEach(n => {
+                const span = document.createElement('div');
+                span.className = 'lucky-num';
+                span.innerText = n < 10 ? '0'+n : n;
+                box.appendChild(span);
+            });
 
-            // 顯示隨機歷史典故
             const story = clappingStories[Math.floor(Math.random() * clappingStories.length)];
             document.getElementById('storyTitle').innerText = story.title;
             document.getElementById('storyContent').innerText = story.content;
+        }
+
+        // 重新開始功能
+        function resetGame() {
+            score = 0;
+            document.getElementById('score-num').innerText = "0";
+            document.getElementById('lottoBtn').style.display = 'none';
+            document.getElementById('lottoModal').style.display = 'none';
         }
 
         function onResize() {
