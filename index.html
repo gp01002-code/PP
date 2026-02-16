@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>拍馬屁大師 - 3D 運勢開運版</title>
+    <title>拍馬屁大師 - 3D 漢字開運版</title>
     <!-- 載入 Three.js 及其必要元件 -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -20,7 +20,7 @@
         }
 
         /* 全域標楷體設定 */
-        body, .couplet, .score-display, .modal, .historical-story, .lotto-btn, button {
+        body, .couplet, .score-display, .modal, .historical-story, .lotto-btn, button, .fortune-container {
             font-family: "標楷體", "DFKai-SB", "Kaiti TC", serif;
         }
 
@@ -57,6 +57,7 @@
             background-color: transparent;
         }
 
+        /* 門板受擊震動特效 */
         @keyframes container-vibrate {
             0% { transform: scale(1); }
             50% { transform: scale(0.98) translate(2px, 2px); }
@@ -81,23 +82,40 @@
             position: absolute;
             background: var(--primary-red);
             color: var(--gold);
-            padding: 8px 4px;
+            padding: 10px 6px;
             font-weight: bold;
             border: 2px solid var(--gold);
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             text-align: center;
             z-index: 20;
             white-space: nowrap;
-            box-shadow: 2px 4px 8px rgba(0,0,0,0.3);
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.4);
             pointer-events: none;
+            transition: transform 0.1s;
         }
-        .top-scroll { top: 12px; width: 160px; left: 50%; transform: translateX(-50%); }
-        .left-side { left: 8px; top: 70px; writing-mode: vertical-rl; }
-        .right-side { right: 8px; top: 70px; writing-mode: vertical-rl; }
+        
+        .top-scroll { top: 15px; width: 200px; left: 50%; transform: translateX(-50%); }
+        .left-side { left: 8px; top: 85px; writing-mode: vertical-rl; }
+        .right-side { right: 8px; top: 85px; writing-mode: vertical-rl; }
+
+        @keyframes couplet-shake {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(3px, -3px) rotate(1deg); }
+            50% { transform: translate(-3px, 3px) rotate(-1deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        @keyframes top-couplet-shake {
+            0% { transform: translateX(-50%) translate(0, 0); }
+            25% { transform: translateX(-50%) translate(2px, -4px); }
+            100% { transform: translateX(-50%) translate(0, 0); }
+        }
+
+        .shake-active { animation: couplet-shake 0.2s ease-in-out; }
+        .top-shake-active { animation: top-couplet-shake 0.2s ease-in-out; }
 
         @media (max-width: 400px) {
-            .couplet { font-size: 0.95rem; }
-            .left-side, .right-side { top: 60px; }
+            .couplet { font-size: 1rem; padding: 6px 4px; }
+            .left-side, .right-side { top: 75px; }
         }
 
         /* 浮空計分板 */
@@ -109,26 +127,27 @@
             text-align: center;
             z-index: 25;
             font-weight: bold;
-            text-shadow: 2px 2px 5px rgba(0,0,0,1);
+            text-shadow: 2px 2px 6px rgba(0,0,0,1), 0 0 12px rgba(211,47,47,0.8);
             pointer-events: none;
         }
-        #score-num { font-size: 3.5rem; color: #fff; display: block; line-height: 1; }
+        #score-num { font-size: 3rem; color: #fff; display: block; line-height: 1.2; margin-top: 5px; }
 
-        /* 運勢按鈕 */
+        /* 領取按鈕 */
         .lotto-btn {
             position: absolute;
-            bottom: 115px;
+            bottom: 130px;
             right: 15px;
-            padding: 10px 18px;
+            padding: 12px 20px;
             background: linear-gradient(to bottom, #ffd700, #ffa000);
             color: #8b0000;
             border: 2px solid #8b0000;
-            border-radius: 20px;
+            border-radius: 25px;
             font-weight: 900;
+            font-size: 1.1rem;
             cursor: pointer;
             display: none;
             z-index: 30;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
             animation: pulse 2s infinite;
         }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
@@ -137,7 +156,7 @@
         .modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.96);
+            background: rgba(0,0,0,0.97);
             z-index: 1000;
             display: none;
             justify-content: flex-start;
@@ -153,50 +172,68 @@
             background: rgba(255, 215, 0, 0.1);
             border: 2px solid var(--gold);
             border-radius: 15px;
-            padding: 20px;
-            margin: 20px 0;
+            padding: 15px;
+            margin: 15px 0;
             width: 100%;
-            max-width: 330px;
+            max-width: 340px;
         }
 
-        .lucky-item-box {
-            font-size: 1.6rem;
-            color: #fff;
-            margin: 15px 0;
+        /* 密碼球排版：縮小並確保一列 */
+        .lucky-num-box {
             display: flex;
             justify-content: center;
-            flex-wrap: wrap;
-            gap: 8px;
+            flex-wrap: wrap; /* 允許換行，但透過 JS 控制特別號才換行 */
+            gap: 6px;
+            margin: 10px 0;
         }
         .lucky-num {
             background: radial-gradient(circle at 30% 30%, #fff, #ffd700);
             color: #8b0000;
-            width: 45px;
-            height: 45px;
+            width: 40px; /* 從 45 縮小 */
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            box-shadow: 0 0 10px gold;
+            font-size: 0.9rem; /* 漢字較寬，字體調小 */
+            box-shadow: 0 0 8px gold;
+        }
+        .lucky-num.special {
+            background: radial-gradient(circle at 30% 30%, #fff, #ff4444);
+            color: #fff;
+            margin-top: 10px;
+            flex-basis: 100%; /* 強制換行 */
+            width: 45px;
+            height: 45px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .special-label {
+            font-size: 0.7rem;
+            color: #ff4444;
+            display: block;
+            margin-bottom: 5px;
+            flex-basis: 100%;
         }
 
         .historical-story {
-            background: rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.06);
             padding: 18px;
             border-radius: 12px;
             margin: 10px 0;
             text-align: left;
-            font-size: 0.95rem;
-            max-width: 330px;
+            font-size: 1rem;
+            max-width: 340px;
             color: #f5e6d3;
             line-height: 1.6;
+            border: 1px solid rgba(255,215,0,0.2);
         }
 
         .float-text {
             position: absolute;
             font-weight: 900;
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             pointer-events: none;
             z-index: 100;
             animation: float-up 0.8s ease-out forwards;
@@ -211,16 +248,17 @@
 <body>
 
     <div id="container">
-        <div class="couplet top-scroll">記得拍屁屁</div>
-        <div class="couplet left-side">拍左邊有 Money</div>
-        <div class="couplet right-side">拍右邊就 Lucky</div>
+        <!-- 春聯已更新為全新古典內容 -->
+        <div id="topCouplet" class="couplet top-scroll">萬事馬到功成</div>
+        <div id="leftCouplet" class="couplet left-side">拍拍駿馬進斗金</div>
+        <div id="rightCouplet" class="couplet right-side">轉動乾坤行大運</div>
 
         <!-- 3D 渲染區域 -->
         <div id="three-canvas"></div>
 
         <div class="score-display">
             累積財氣
-            <span id="score-num">0</span>
+            <span id="score-num">零</span>
         </div>
 
         <button id="lottoBtn" class="lotto-btn" onclick="showFortune()">領取運勢指引</button>
@@ -232,10 +270,10 @@
         
         <div class="fortune-container">
             <b style="color:var(--gold); font-size: 1.2rem;">✨ 馬年開運指引 ✨</b>
-            <p id="fortuneTip" style="color: #fff; line-height: 1.5; margin: 15px 0;"></p>
-            <hr style="border: 0.5px solid rgba(255,215,0,0.3);">
+            <p id="fortuneTip" style="color: #fff; line-height: 1.6; margin: 15px 0; font-size: 1.1rem;"></p>
+            <hr style="border: 0.5px solid rgba(255,215,0,0.3); margin: 10px 0;">
             <b style="color:var(--gold);">🍀 本週開運密碼 🍀</b>
-            <div id="luckyNumsBox" class="lucky-item-box"></div>
+            <div id="luckyNumsBox" class="lucky-num-box"></div>
         </div>
         
         <div id="storyBox" class="historical-story">
@@ -243,7 +281,7 @@
             <span id="storyContent"></span>
         </div>
 
-        <button onclick="resetGame()" style="margin-top:20px; padding:12px 60px; border-radius:30px; background:var(--primary-red); color:white; border:2px solid var(--gold); font-weight:bold; font-size:1.2rem; cursor:pointer;">謝大師指點</button>
+        <button onclick="resetGame()" style="margin-top:20px; padding:15px 70px; border-radius:35px; background:var(--primary-red); color:white; border:2px solid var(--gold); font-weight:bold; font-size:1.3rem; cursor:pointer;">謝大師指點</button>
     </div>
 
     <script>
@@ -251,13 +289,46 @@
         let score = 0;
         const buttSensors = []; 
 
+        // 數字轉中文漢字輔助函式
+        function toChineseNum(num) {
+            if (num === 0) return "零";
+            const chnNumChar = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+            const chnUnitChar = ["", "十", "百", "千"];
+            let strIns = '', chnStr = '';
+            let unitPos = 0;
+            let zero = true;
+            
+            // 針對 1-99 進行優化 (常規運勢號碼範圍)
+            if (num < 20 && num >= 10) {
+                return "十" + (num % 10 === 0 ? "" : chnNumChar[num % 10]);
+            }
+
+            while (num > 0) {
+                let v = num % 10;
+                if (v === 0) {
+                    if (!zero) {
+                        zero = true;
+                        chnStr = chnNumChar[v] + chnStr;
+                    }
+                } else {
+                    zero = false;
+                    strIns = chnNumChar[v];
+                    strIns += chnUnitChar[unitPos];
+                    chnStr = strIns + chnStr;
+                }
+                unitPos++;
+                num = Math.floor(num / 10);
+            }
+            return chnStr;
+        }
+
         const horseYearTips = [
             "馬不停蹄，今年事業將有如神助，適合積極開拓新領域。",
             "龍馬精神，健康運勢極佳，建議多接觸大自然吸收正能量。",
             "一馬當先，在團隊中若能勇於表達意見，將會獲得貴人賞識。",
             "馬到成功，長期堅持的計畫即將迎來收穫，切莫半途而廢。",
             "天馬行空，創意靈感爆發的時期，適合從事藝術或企劃工作。",
-            "馬鳴風蕭，凡事以靜制動，在重要決策前多聽聽長輩的意見。"
+            "馬鳴風蕭，凡事以靜制動，在決策前多聽聽長輩意見。"
         ];
 
         const clappingStories = [
@@ -270,7 +341,6 @@
             const canvasWrapper = document.getElementById('three-canvas');
             clock = new THREE.Clock();
             scene = new THREE.Scene();
-            
             camera = new THREE.PerspectiveCamera(45, canvasWrapper.clientWidth / canvasWrapper.clientHeight, 0.1, 1000);
             camera.position.set(0, 0.5, 6.5); 
 
@@ -300,24 +370,17 @@
             const loader = new THREE.GLTFLoader();
             loader.load(modelUrl, function(gltf) {
                 horseModel = gltf.scene;
-                
                 if (gltf.animations && gltf.animations.length > 0) {
                     mixer = new THREE.AnimationMixer(horseModel);
                     const runAction = mixer.clipAction(gltf.animations[0]); 
                     runAction.play();
                 }
-
                 createButtSensors();
-                
                 const box = new THREE.Box3().setFromObject(horseModel);
                 const center = box.getCenter(new THREE.Vector3());
                 horseModel.position.sub(center);
                 scene.add(horseModel);
-                
                 horseModel.rotation.y = -Math.PI / 3; 
-                
-            }, undefined, function(error) {
-                console.error("載入失敗:", error);
             });
 
             renderer.domElement.addEventListener('pointerdown', onClick);
@@ -325,26 +388,14 @@
             animate();
         }
 
-        /**
-         * 修正屁屁位置：提高至 1.35，並調整 Z 軸座標貼近馬背
-         */
         function createButtSensors() {
-            const sensorMat = new THREE.MeshPhongMaterial({
-                color: 0xffffff,
-                transparent: true,
-                opacity: 0.1, 
-                shininess: 300
-            });
-            
+            const sensorMat = new THREE.MeshPhongMaterial({color: 0xffffff, transparent: true, opacity: 0.1, shininess: 300});
             const sensorGeo = new THREE.SphereGeometry(0.4, 32, 32);
-
-            // 提升高度到 1.35
             const leftSensor = new THREE.Mesh(sensorGeo, sensorMat.clone());
             leftSensor.position.set(-0.35, 1.35, -0.2); 
             leftSensor.name = "butt_sensor_left";
             horseModel.add(leftSensor);
             buttSensors.push(leftSensor);
-
             const rightSensor = new THREE.Mesh(sensorGeo, sensorMat.clone());
             rightSensor.position.set(0.1, 1.35, -0.3); 
             rightSensor.name = "butt_sensor_right";
@@ -356,37 +407,37 @@
             const rect = renderer.domElement.getBoundingClientRect();
             mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
             mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObjects(scene.children, true);
-
             if (intersects.length > 0) {
                 const hit = intersects[0].object;
-                if (hit.name.includes("butt_sensor")) {
-                    onPatSuccess(hit, event.clientX, event.clientY);
-                }
+                if (hit.name.includes("butt_sensor")) onPatSuccess(hit, event.clientX, event.clientY);
             }
         }
 
         function onPatSuccess(mesh, x, y) {
             const gain = Math.floor(Math.random() * 10) + 1;
             score += gain;
-            document.getElementById('score-num').innerText = score;
+            // 更新累積財氣為中文
+            document.getElementById('score-num').innerText = toChineseNum(score);
             if (score >= 300) document.getElementById('lottoBtn').style.display = 'block';
 
             mesh.scale.set(1.4, 0.6, 1.4);
             mesh.material.opacity = 0.5;
-            setTimeout(() => {
-                mesh.scale.set(1, 1, 1);
-                mesh.material.opacity = 0.1;
-            }, 100);
+            setTimeout(() => { mesh.scale.set(1, 1, 1); mesh.material.opacity = 0.1; }, 100);
 
             const doorContainer = document.getElementById('container');
             doorContainer.classList.remove('vibrate');
             void doorContainer.offsetWidth;
             doorContainer.classList.add('vibrate');
 
-            createFloatText(x, y, x < window.innerWidth/2 ? `💰 +${gain}` : `🍀 +${gain}`);
+            const tc = document.getElementById('topCouplet');
+            const lc = document.getElementById('leftCouplet');
+            const rc = document.getElementById('rightCouplet');
+            [lc, rc].forEach(c => { c.classList.remove('shake-active'); void c.offsetWidth; c.classList.add('shake-active'); });
+            tc.classList.remove('top-shake-active'); void tc.offsetWidth; tc.classList.add('top-shake-active');
+
+            createFloatText(x, y, x < window.innerWidth/2 ? `💰 +${toChineseNum(gain)}` : `🍀 +${toChineseNum(gain)}`);
             if (navigator.vibrate) navigator.vibrate(55);
             playPatSound();
         }
@@ -407,8 +458,8 @@
             const div = document.createElement('div');
             div.className = 'float-text';
             div.innerText = txt;
-            div.style.left = (x - 50) + 'px';
-            div.style.top = (y - 50) + 'px';
+            div.style.left = (x - 60) + 'px';
+            div.style.top = (y - 60) + 'px';
             div.style.color = txt.includes("💰") ? "gold" : "#00ff88";
             document.body.appendChild(div);
             setTimeout(() => div.remove(), 800);
@@ -417,10 +468,10 @@
         function showFortune() {
             document.getElementById('lottoModal').style.display = 'flex';
             document.getElementById('fortuneTip').innerText = horseYearTips[Math.floor(Math.random() * horseYearTips.length)];
-            
-            // 產生神祕開運密碼
             const box = document.getElementById('luckyNumsBox');
             box.innerHTML = '';
+            
+            // 隨機產生 6 個普通密碼 + 1 個特別號
             let nums = [];
             while(nums.length < 6) {
                 let n = Math.floor(Math.random() * 49) + 1;
@@ -429,19 +480,29 @@
             nums.sort((a,b)=>a-b).forEach(n => {
                 const span = document.createElement('div');
                 span.className = 'lucky-num';
-                span.innerText = n < 10 ? '0'+n : n;
+                span.innerText = toChineseNum(n);
                 box.appendChild(span);
             });
+
+            // 加入特別號與換行標籤
+            const label = document.createElement('div');
+            label.className = 'special-label';
+            label.innerText = "── 特別守護碼 ──";
+            box.appendChild(label);
+            
+            const special = document.createElement('div');
+            special.className = 'lucky-num special';
+            special.innerText = toChineseNum(Math.floor(Math.random() * 8) + 1);
+            box.appendChild(special);
 
             const story = clappingStories[Math.floor(Math.random() * clappingStories.length)];
             document.getElementById('storyTitle').innerText = story.title;
             document.getElementById('storyContent').innerText = story.content;
         }
 
-        // 重新開始功能
         function resetGame() {
             score = 0;
-            document.getElementById('score-num').innerText = "0";
+            document.getElementById('score-num').innerText = "零";
             document.getElementById('lottoBtn').style.display = 'none';
             document.getElementById('lottoModal').style.display = 'none';
         }
