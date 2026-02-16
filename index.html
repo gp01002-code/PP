@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>拍馬屁大師 - 終極 Q 彈修正版</title>
+    <title>拍馬屁大師 - 純淨背景版</title>
     <style>
         :root {
             --primary-red: #d32f2f;
             --gold: #ffd700;
             --butt-pink: #ffb6c1;
-            /* --- 調整這裡來移動屁屁的位置 --- */
-            --butt-y-offset: 40px; /* 越高數字屁屁越往上 */
-            --butt-scale: 1.1;     /* 調整屁屁的大小 */
+            /* 調整這裡來微調屁屁在馬身上的位置 */
+            --butt-y-offset: 80px; 
         }
         
         * {
@@ -21,6 +20,7 @@
 
         body {
             margin: 0;
+            padding: 0;
             background-color: #f5e6d3;
             font-family: "Microsoft JhengHei", sans-serif;
             display: flex;
@@ -31,7 +31,7 @@
             touch-action: manipulation;
         }
 
-        /* 門的場景 */
+        /* 門的場景 - 讀取 door.jpg */
         .door-scene {
             position: relative;
             width: 380px;
@@ -40,7 +40,7 @@
             background-image: url('door.jpg'); 
             background-size: cover;
             background-position: center;
-            border: 12px solid #2a1104;
+            /* 移除門框邊界，讓門圖更完整 */
             border-radius: 8px;
             display: flex;
             flex-direction: column;
@@ -49,14 +49,15 @@
             transition: transform 0.1s;
         }
 
-        /* 門板震動 */
-        @keyframes door-hit {
+        /* 門板受擊震動 */
+        @keyframes door-vibration {
             0% { transform: scale(1); }
-            50% { transform: scale(0.98); }
+            50% { transform: scale(0.98) translate(1px, 1px); }
             100% { transform: scale(1); }
         }
-        .hit-active { animation: door-hit 0.1s ease-out; }
+        .vibrate { animation: door-vibration 0.1s ease-out; }
 
+        /* 春聯樣式 */
         .couplet {
             position: absolute;
             background: var(--primary-red);
@@ -71,25 +72,22 @@
             box-shadow: 2px 4px 8px rgba(0,0,0,0.3);
             pointer-events: none;
         }
-        .top-scroll { top: -50px; width: 220px; }
-        .left-side { left: -75px; top: 40px; writing-mode: vertical-rl; }
-        .right-side { right: -75px; top: 40px; writing-mode: vertical-rl; }
+        .top-scroll { top: -45px; width: 220px; }
+        .left-side { left: -60px; top: 60px; writing-mode: vertical-rl; }
+        .right-side { right: -60px; top: 60px; writing-mode: vertical-rl; }
 
-        /* 馬兒卡片 */
-        .horse-card {
-            margin-top: 60px;
-            width: 330px;
-            height: 450px;
-            background-color: #d32f2f;
+        /* 馬兒圖層 - 移除了背景色與邊框 */
+        .horse-layer {
+            position: absolute;
+            top: 100px;
+            width: 320px;
+            height: 400px;
             background-image: url('horse.png'); 
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
-            border: 6px solid var(--gold);
-            position: relative;
-            display: flex;
-            justify-content: center;
-            overflow: hidden;
+            pointer-events: none; /* 讓點擊穿透到屁屁 */
+            z-index: 5;
         }
 
         /* 兩片式「蜜桃」屁屁容器 */
@@ -103,70 +101,54 @@
             justify-content: center;
             align-items: flex-end;
             cursor: pointer;
-            transform: scale(var(--butt-scale));
             transform-origin: center bottom;
         }
 
         .cheek {
             width: 105px;
-            height: 125px;
+            height: 130px;
             background: radial-gradient(circle at 50% 30%, #ffc0cb 0%, #ff80ab 70%, #f06292 100%);
             box-shadow: 
-                0 10px 25px rgba(0,0,0,0.4),
+                0 15px 30px rgba(0,0,0,0.4),
                 inset 0 -10px 20px rgba(0,0,0,0.1),
-                inset 0 10px 15px rgba(255,255,255,0.5);
+                inset 0 10px 15px rgba(255,255,255,0.4);
             transition: transform 0.1s;
         }
 
         .cheek.left {
-            border-radius: 65% 35% 40% 65%;
-            transform: rotate(-5deg) translateX(4px);
+            border-radius: 65% 35% 35% 65%;
+            transform: rotate(-10deg) translateX(8px);
         }
 
         .cheek.right {
-            border-radius: 35% 65% 65% 40%;
-            transform: rotate(5deg) translateX(-4px);
+            border-radius: 35% 65% 65% 35%;
+            transform: rotate(10deg) translateX(-8px);
         }
 
-        /* Q 彈果凍動畫：壓扁、左右擴張、回彈震盪 */
-        @keyframes jelly-effect {
-            0% { transform: scale(var(--butt-scale), var(--butt-scale)); }
-            20% { transform: scale(calc(var(--butt-scale) * 1.4), calc(var(--butt-scale) * 0.7)); }
-            40% { transform: scale(calc(var(--butt-scale) * 0.9), calc(var(--butt-scale) * 1.15)); }
-            60% { transform: scale(calc(var(--butt-scale) * 1.05), calc(var(--butt-scale) * 0.95)); }
-            100% { transform: scale(var(--butt-scale), var(--butt-scale)); }
+        /* Q 彈動畫 */
+        @keyframes jelly-bounce {
+            0% { transform: scale(1, 1); }
+            20% { transform: scale(1.4, 0.6); }
+            45% { transform: scale(0.9, 1.25); }
+            100% { transform: scale(1, 1); }
         }
+        .jelly-active { animation: jelly-bounce 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
 
-        .jelly-active {
-            animation: jelly-effect 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-
-        /* 統計與按鈕 */
-        .stats-panel {
-            margin-top: 25px;
-            color: var(--gold);
-            text-align: center;
-            background: rgba(0,0,0,0.85);
-            padding: 15px 30px;
-            border-radius: 30px;
-            border: 2px solid var(--gold);
-            backdrop-filter: blur(8px);
-            width: 320px;
-        }
-        #score-num { font-size: 3.5rem; font-weight: bold; display: block; color: #fff; text-shadow: 0 0 15px var(--gold); }
-
+        /* 隱藏式明牌按鈕 - 只有在解鎖時出現在右下角 */
         .lotto-btn {
-            margin-top: 10px;
-            padding: 12px 24px;
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
             background: linear-gradient(to bottom, #ffd700, #ffa000);
             color: #8b0000;
-            border: none;
-            border-radius: 25px;
+            border: 2px solid #8b0000;
+            border-radius: 20px;
             font-weight: 900;
-            font-size: 1.1rem;
             cursor: pointer;
             display: none;
-            box-shadow: 0 4px 0 #b8860b;
+            z-index: 30;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
 
         /* 漂浮文字 */
@@ -180,24 +162,11 @@
         }
         @keyframes float-up {
             0% { transform: translateY(0) scale(0.5); opacity: 0; }
-            20% { opacity: 1; }
-            100% { transform: translateY(-150px) scale(1.6); opacity: 0; }
+            25% { opacity: 1; }
+            100% { transform: translateY(-160px) scale(1.8); opacity: 0; }
         }
 
-        /* 點擊衝擊波 */
-        .shockwave {
-            position: absolute;
-            border: 4px solid rgba(255,255,255,0.5);
-            border-radius: 50%;
-            pointer-events: none;
-            animation: wave 0.4s ease-out forwards;
-        }
-        @keyframes wave {
-            0% { width: 0; height: 0; opacity: 1; }
-            100% { width: 200px; height: 100px; opacity: 0; }
-        }
-
-        /* 彈窗樣式 */
+        /* 號碼彈窗 */
         .modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -208,56 +177,58 @@
             flex-direction: column; color: var(--gold);
             padding: 20px;
         }
-        .ball-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 20px; }
+        .ball-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 25px; }
         .ball {
-            width: 50px; height: 50px; background: white; border-radius: 50%;
-            color: #8b0000; display: flex; justify-content: center; align-items: center;
-            font-size: 1.5rem; font-weight: bold;
+            width: 55px; height: 55px; background: radial-gradient(circle at 30% 30%, #fff, #ffd700);
+            border-radius: 50%; color: #8b0000; display: flex; justify-content: center;
+            align-items: center; font-size: 1.6rem; font-weight: bold;
+            box-shadow: 0 5px 15px rgba(255,215,0,0.4);
+            animation: ball-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
     </style>
 </head>
 <body>
 
     <div id="lottoModal" class="modal">
-        <h2>🏮 大師指點．幸運明牌 🏮</h2>
+        <h2 style="font-size: 2rem;">🏮 財氣顯靈．開出明牌 🏮</h2>
         <div id="ballContainer" class="ball-container"></div>
-        <button onclick="document.getElementById('lottoModal').style.display='none'" style="padding:10px 30px; font-weight:bold; cursor:pointer;">收下好運</button>
+        <button onclick="document.getElementById('lottoModal').style.display='none'" style="padding:12px 40px; border-radius:10px; background:var(--primary-red); color:white; border:2px solid var(--gold); cursor:pointer; font-weight:bold;">收下明牌</button>
     </div>
 
     <div id="door" class="door-scene">
+        <!-- 春聯 -->
         <div class="couplet top-scroll">記得拍屁屁</div>
         <div class="couplet left-side">拍左邊有 Money</div>
         <div class="couplet right-side">拍右邊就 Lucky</div>
 
-        <div class="horse-card">
-            <div id="patTarget" class="butt-container">
-                <div class="cheek left"></div>
-                <div class="cheek right"></div>
-            </div>
+        <!-- 馬兒圖層 (透明底) -->
+        <div class="horse-layer"></div>
+
+        <!-- 屁屁互動區 -->
+        <div id="patTarget" class="butt-container">
+            <div class="cheek left"></div>
+            <div class="cheek right"></div>
         </div>
 
-        <div class="stats-panel">
-            累積財氣 <span id="score-num">0</span>
-            <button id="lottoBtn" class="lotto-btn" onclick="showLotto()">領取幸運號碼</button>
-        </div>
+        <!-- 隱藏按鈕 -->
+        <button id="lottoBtn" class="lotto-btn" onclick="showLotto()">領取明牌</button>
     </div>
 
     <script>
         const target = document.getElementById('patTarget');
-        const scoreDisplay = document.getElementById('score-num');
         const lottoBtn = document.getElementById('lottoBtn');
         const door = document.getElementById('door');
         let score = 0;
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playPatSound() {
+        function playSound() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
             const g = audioCtx.createGain();
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(180, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.1);
-            g.gain.setValueAtTime(0.6, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(60, audioCtx.currentTime + 0.1);
+            g.gain.setValueAtTime(0.7, audioCtx.currentTime);
             g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
             osc.connect(g); g.connect(audioCtx.destination);
             osc.start(); osc.stop(audioCtx.currentTime + 0.1);
@@ -265,44 +236,30 @@
 
         function onPat(e) {
             if (e.cancelable) e.preventDefault();
-            playPatSound();
+            playSound();
             
             const gain = Math.floor(Math.random() * 10) + 1;
             score += gain;
-            scoreDisplay.innerText = score;
 
-            if (score >= 200) lottoBtn.style.display = 'inline-block';
+            // 累積到 300 財氣隱藏按鈕出現
+            if (score >= 300) lottoBtn.style.display = 'block';
 
-            // 觸發 Q 彈動畫
             target.classList.remove('jelly-active');
             void target.offsetWidth; 
             target.classList.add('jelly-active');
 
-            // 觸發門板打擊動畫
-            door.classList.remove('hit-active');
+            door.classList.remove('vibrate');
             void door.offsetWidth;
-            door.classList.add('hit-active');
+            door.classList.add('vibrate');
 
-            // 建立衝擊波特效
             const x = e.clientX || (e.touches ? e.touches[0].clientX : 0);
             const y = e.clientY || (e.touches ? e.touches[0].clientY : 0);
-            createShockwave(x, y);
-
-            // 噴出文字
             const rect = target.getBoundingClientRect();
             const isLeft = (x - rect.left) < rect.width / 2;
+            
             createFloat(x, y, isLeft ? `💰 +${gain}` : `🍀 +${gain}`, isLeft ? "gold" : "#00ff88");
 
-            if (navigator.vibrate) navigator.vibrate(40);
-        }
-
-        function createShockwave(x, y) {
-            const wave = document.createElement('div');
-            wave.className = 'shockwave';
-            wave.style.left = (x - 100) + 'px';
-            wave.style.top = (y - 50) + 'px';
-            document.body.appendChild(wave);
-            setTimeout(() => wave.remove(), 400);
+            if (navigator.vibrate) navigator.vibrate(45);
         }
 
         function createFloat(x, y, txt, clr) {
@@ -320,13 +277,20 @@
         function showLotto() {
             const container = document.getElementById('ballContainer');
             container.innerHTML = '';
-            for(let i=0; i<6; i++) {
-                const b = document.createElement('div');
-                b.className = 'ball';
-                b.innerText = Math.floor(Math.random() * 49) + 1;
-                container.appendChild(b);
-            }
             document.getElementById('lottoModal').style.display = 'flex';
+            let nums = [];
+            while(nums.length < 6) {
+                const n = Math.floor(Math.random() * 49) + 1;
+                if(!nums.includes(n)) nums.push(n);
+            }
+            nums.sort((a,b) => a-b).forEach((n, i) => {
+                setTimeout(() => {
+                    const b = document.createElement('div');
+                    b.className = 'ball';
+                    b.innerText = n < 10 ? '0' + n : n;
+                    container.appendChild(b);
+                }, i * 200);
+            });
         }
 
         target.addEventListener('mousedown', onPat);
