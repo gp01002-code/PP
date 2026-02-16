@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>拍馬屁大師 - 3D 終極版</title>
+    <title>拍馬屁大師 - 3D 運勢開運版</title>
     <!-- 載入 Three.js 及其必要元件 -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -32,41 +32,44 @@
             touch-action: none;
         }
 
-        /* 門的場景容器 */
+        /* 門的場景容器 - 確保 door.jpg 顯示在最底層 */
         #container {
             position: relative;
             width: 380px;
             height: 620px;
             max-width: 95vw;
-            max-height: 90vh;
+            max-height: 92vh;
+            /* 載入你的背景圖 */
             background-image: url('door.jpg'); 
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
             border: 8px solid #2a1104;
-            border-radius: 8px;
+            border-radius: 12px;
             box-shadow: 0 40px 80px rgba(0,0,0,0.8);
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 確保畫布是透明的 */
-            background-color: transparent;
         }
 
-        /* 門板受擊震動 */
+        /* 門板震動特效 */
         @keyframes container-vibrate {
             0% { transform: scale(1); }
-            50% { transform: scale(0.985) translate(2px, 2px); }
+            50% { transform: scale(0.98) translate(2px, 2px); }
             100% { transform: scale(1); }
         }
-        .vibrate { animation: container-vibrate 0.1s ease-out; }
+        .vibrate { animation: container-vibrate 0.12s ease-out; }
 
+        /* 3D 渲染區域 - 設定為絕對定位覆蓋在背景之上 */
         #three-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             cursor: grab;
             z-index: 5;
-            background: transparent !important;
         }
 
         /* 春聯樣式 */
@@ -84,14 +87,19 @@
             box-shadow: 2px 4px 8px rgba(0,0,0,0.3);
             pointer-events: none;
         }
-        .top-scroll { top: 10px; width: 160px; left: 50%; transform: translateX(-50%); }
+        .top-scroll { top: 12px; width: 160px; left: 50%; transform: translateX(-50%); }
         .left-side { left: 8px; top: 70px; writing-mode: vertical-rl; }
         .right-side { right: 8px; top: 70px; writing-mode: vertical-rl; }
+
+        @media (max-width: 400px) {
+            .couplet { font-size: 0.95rem; }
+            .left-side, .right-side { top: 60px; }
+        }
 
         /* 浮空計分板 */
         .score-display {
             position: absolute;
-            bottom: 20px;
+            bottom: 25px;
             width: 100%;
             color: var(--gold);
             text-align: center;
@@ -102,7 +110,7 @@
         }
         #score-num { font-size: 3.5rem; color: #fff; display: block; line-height: 1; }
 
-        /* 明牌按鈕 */
+        /* 運勢按鈕 */
         .lotto-btn {
             position: absolute;
             bottom: 115px;
@@ -112,7 +120,7 @@
             color: #8b0000;
             border: 2px solid #8b0000;
             border-radius: 20px;
-            font-weight: bold;
+            font-weight: 900;
             cursor: pointer;
             display: none;
             z-index: 30;
@@ -136,11 +144,35 @@
             overflow-y: auto;
             text-align: center;
         }
-        .ball-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 20px 0; }
-        .ball {
-            width: 50px; height: 50px; background: radial-gradient(circle at 30% 30%, #fff, #ffd700);
-            border-radius: 50%; color: #8b0000; display: flex; justify-content: center;
-            align-items: center; font-size: 1.5rem; font-weight: bold;
+
+        /* 運勢顯示區 */
+        .fortune-container {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid var(--gold);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 330px;
+        }
+
+        .lucky-item {
+            font-size: 1.5rem;
+            color: #fff;
+            margin: 10px 0;
+            display: block;
+        }
+
+        .historical-story {
+            background: rgba(255,255,255,0.05);
+            padding: 18px;
+            border-radius: 12px;
+            margin: 10px 0;
+            text-align: left;
+            font-size: 0.95rem;
+            max-width: 330px;
+            color: #f5e6d3;
+            line-height: 1.6;
         }
 
         .float-text {
@@ -162,10 +194,12 @@
 <body>
 
     <div id="container">
+        <!-- 春聯內容 -->
         <div class="couplet top-scroll">記得拍屁屁</div>
         <div class="couplet left-side">拍左邊有 Money</div>
         <div class="couplet right-side">拍右邊就 Lucky</div>
 
+        <!-- 3D 渲染區域 -->
         <div id="three-canvas"></div>
 
         <div class="score-display">
@@ -173,57 +207,81 @@
             <span id="score-num">0</span>
         </div>
 
-        <button id="lottoBtn" class="lotto-btn" onclick="showLotto()">領取明牌</button>
+        <button id="lottoBtn" class="lotto-btn" onclick="showFortune()">領取運勢指引</button>
     </div>
 
-    <!-- 幸運彈窗 -->
+    <!-- 幸運運勢彈窗 -->
     <div id="lottoModal" class="modal">
-        <h2 style="font-size: 1.8rem; color: var(--gold);">🏮 3D 神算．明牌顯靈 🏮</h2>
-        <h3 id="lottoName" style="color: #fff; margin: 10px 0;"></h3>
-        <div id="ballContainer" class="ball-container"></div>
-        <div id="storyBox" style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin: 15px 0; text-align: left; font-size: 0.9rem; max-width: 320px;">
-            <b id="storyTitle" style="color:var(--gold)"></b><br>
+        <h2 style="font-size: 2rem; color: var(--gold);">🏮 拍馬顯靈．馬年大吉 🏮</h2>
+        
+        <div class="fortune-container">
+            <b style="color:var(--gold); font-size: 1.2rem;">✨ 馬年開運指引 ✨</b>
+            <p id="fortuneTip" style="color: #fff; line-height: 1.5; margin: 15px 0;"></p>
+            <hr style="border: 0.5px solid rgba(255,215,0,0.3);">
+            <b style="color:var(--gold);">🍀 本週守護小物 🍀</b>
+            <span id="luckyItem" class="lucky-item"></span>
+        </div>
+        
+        <div id="storyBox" class="historical-story">
+            <b id="storyTitle" style="color:var(--gold); font-size:1.1rem; border-bottom: 1px solid var(--gold); display:block; padding-bottom:5px; margin-bottom:10px;"></b>
             <span id="storyContent"></span>
         </div>
-        <button onclick="document.getElementById('lottoModal').style.display='none'" style="margin-top:20px; padding:12px 50px; border-radius:30px; background:var(--primary-red); color:white; border:2px solid var(--gold); font-weight:bold;">謝大師賜教</button>
+
+        <button onclick="document.getElementById('lottoModal').style.display='none'" style="margin-top:20px; padding:12px 50px; border-radius:30px; background:var(--primary-red); color:white; border:2px solid var(--gold); font-weight:bold; cursor:pointer;">謝大師指點</button>
     </div>
 
     <script>
-        let scene, camera, renderer, controls, horseModel, raycaster, mouse;
+        let scene, camera, renderer, controls, horseModel, raycaster, mouse, mixer, clock;
         let score = 0;
-        const buttMeshes = []; 
+        const buttSensors = []; 
+
+        // 馬年運勢指引資料庫
+        const horseYearTips = [
+            "馬不停蹄，今年事業將有如神助，適合積極開拓新領域。",
+            "龍馬精神，健康運勢極佳，建議多接觸大自然吸收正能量。",
+            "一馬當先，在團隊中若能勇於表達意見，將會獲得貴人賞識。",
+            "馬到成功，長期堅持的計畫即將迎來收穫，切莫半途而廢。",
+            "天馬行空，創意靈感爆發的時期，適合從事藝術或企劃工作。",
+            "馬鳴風蕭，凡事以靜制動，在重要決策前多聽聽長輩的意見。"
+        ];
+
+        const luckyItems = [
+            "🧧 紅色錢包", "📿 黃金飾品", "🍵 綠色植栽", "💎 水晶掛件", "👟 運動跑鞋", "📜 書法真跡"
+        ];
 
         const clappingStories = [
-            { title: "南唐．李嘉明拍馬屁", content: "李嘉明見皇帝欲取魚，技藝精湛卻不親手抓，藉此將恩寵讓與近臣，引導風向。語出：「王者之王與龍，魚與龍更是不同。」" },
-            { title: "清乾隆．阮元眼鏡詩", content: "阮元得知乾隆不戴眼鏡實為明君，以此詩讚頌目光銳利。乾隆大悅，賜其官運平步青雲。語出：「猶由瞳功能完成，標誌著順君的征服。」" },
-            { title: "明初．朱元璋葬禮", content: "葬禮時狂風暴雨，有人妙語稱此乃天地同悲，如來佛祖親自相迎，化悲傷為吉兆。語出：「西方的佛，同名的佛。」" }
+            { title: "南唐．李嘉明拍馬屁", content: "李嘉明與侍從見皇帝欲取魚，技藝精湛卻不親自下手，藉此將恩寵讓與他人，引導風向深得帝心。語出：「王者之王與龍，魚與龍更是不同。」" },
+            { title: "唐末．杜迅巧思昇華", content: "杜迅見朱溫登基之勢，將生死昇華為天意，讓帝王深感自己受天命眷顧，帶來繁榮昌盛。語出：「當日月星辰流轉，朱文之歌響徹雲霄。」" },
+            { title: "清乾隆．阮元眼鏡詩", content: "阮元得知乾隆不戴眼鏡實為明君之眼，以此詩讚頌目光銳利。乾隆大悅，賜其官運平步青雲。語出：「猶由瞳功能完成，標誌著順君的征服。」" }
         ];
 
         function init() {
             const canvasWrapper = document.getElementById('three-canvas');
+            clock = new THREE.Clock();
             scene = new THREE.Scene();
             
             camera = new THREE.PerspectiveCamera(45, canvasWrapper.clientWidth / canvasWrapper.clientHeight, 0.1, 1000);
-            camera.position.set(0, 0.2, 5);
+            camera.position.set(0, 0.5, 6); 
 
+            // 關鍵：alpha: true 讓渲染器背景透明
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); 
             renderer.setSize(canvasWrapper.clientWidth, canvasWrapper.clientHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.setClearColor(0x000000, 0); 
+            renderer.setClearColor(0x000000, 0); // 確保清除色透明度為 0
             canvasWrapper.appendChild(renderer.domElement);
 
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
+            controls.enablePan = false; 
 
-            scene.add(new THREE.AmbientLight(0xffffff, 0.9));
-            const sun = new THREE.DirectionalLight(0xffffff, 0.8);
+            scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+            const sun = new THREE.DirectionalLight(0xffffff, 1.0);
             sun.position.set(5, 10, 5);
             scene.add(sun);
 
             raycaster = new THREE.Raycaster();
             mouse = new THREE.Vector2();
 
-            // 載入路徑偵測
             let modelUrl = 'horse_sculpture.glb';
             if (window.location.protocol === 'blob:' || !window.location.href.includes('github.io')) {
                 modelUrl = 'https://raw.githubusercontent.com/gp01002-code/PP/main/horse_sculpture.glb';
@@ -233,7 +291,12 @@
             loader.load(modelUrl, function(gltf) {
                 horseModel = gltf.scene;
                 
-                // --- 修正屁屁位置：根據你的截圖，馬頭朝右前，屁股應該在左後方 ---
+                if (gltf.animations && gltf.animations.length > 0) {
+                    mixer = new THREE.AnimationMixer(horseModel);
+                    const runAction = mixer.clipAction(gltf.animations[0]); 
+                    runAction.play();
+                }
+
                 createButtSensors();
                 
                 const box = new THREE.Box3().setFromObject(horseModel);
@@ -241,12 +304,10 @@
                 horseModel.position.sub(center);
                 scene.add(horseModel);
                 
-                // 初始馬兒角度稍微轉向側邊
-                horseModel.rotation.y = -Math.PI / 4; 
+                horseModel.rotation.y = -Math.PI / 3; 
                 
             }, undefined, function(error) {
                 console.error("載入失敗:", error);
-                createFallbackHorse();
             });
 
             renderer.domElement.addEventListener('pointerdown', onClick);
@@ -255,36 +316,27 @@
         }
 
         function createButtSensors() {
-            // 感應球材質：隱約可見的白色閃光
             const sensorMat = new THREE.MeshPhongMaterial({
                 color: 0xffffff,
                 transparent: true,
-                opacity: 0.15, // 調高一點點讓你比較好對準測試
-                shininess: 150
+                opacity: 0.1, 
+                shininess: 250
             });
             
-            const sensorGeo = new THREE.SphereGeometry(0.55, 32, 32);
+            const sensorGeo = new THREE.SphereGeometry(0.45, 32, 32);
 
-            // --- 座標更新：X 為負(左)，Z 為負(後) ---
-            // 左屁屁
-            const leftSensor = new THREE.Mesh(sensorGeo, sensorMat);
-            leftSensor.position.set(-0.5, 0.6, -1.0); 
+            // 調整感應球位置：提升至 1.05 處（馬背臀部）
+            const leftSensor = new THREE.Mesh(sensorGeo, sensorMat.clone());
+            leftSensor.position.set(-0.3, 1.1, -0.35); 
             leftSensor.name = "butt_sensor_left";
             horseModel.add(leftSensor);
-            buttMeshes.push(leftSensor);
+            buttSensors.push(leftSensor);
 
-            // 右屁屁
-            const rightSensor = new THREE.Mesh(sensorGeo, sensorMat);
-            rightSensor.position.set(-0.2, 0.6, -1.2); 
+            const rightSensor = new THREE.Mesh(sensorGeo, sensorMat.clone());
+            rightSensor.position.set(0.15, 1.1, -0.45); 
             rightSensor.name = "butt_sensor_right";
             horseModel.add(rightSensor);
-            buttMeshes.push(rightSensor);
-        }
-
-        function createFallbackHorse() {
-            horseModel = new THREE.Group();
-            createButtSensors();
-            scene.add(horseModel);
+            buttSensors.push(rightSensor);
         }
 
         function onClick(event) {
@@ -297,7 +349,7 @@
 
             if (intersects.length > 0) {
                 const hit = intersects[0].object;
-                if (hit.name.toLowerCase().includes("butt")) {
+                if (hit.name.includes("butt_sensor")) {
                     onPatSuccess(hit, event.clientX, event.clientY);
                 }
             }
@@ -307,25 +359,23 @@
             const gain = Math.floor(Math.random() * 10) + 1;
             score += gain;
             document.getElementById('score-num').innerText = score;
-            if (score >= 200) document.getElementById('lottoBtn').style.display = 'block';
+            if (score >= 300) document.getElementById('lottoBtn').style.display = 'block';
 
-            // --- 強力 3D 動畫：壓扁再回彈 ---
+            // 強力縮放動畫
             mesh.scale.set(1.5, 0.5, 1.5);
+            mesh.material.opacity = 0.6;
             setTimeout(() => {
-                mesh.scale.set(0.9, 1.1, 0.9); // 反彈拉長
-                setTimeout(() => mesh.scale.set(1, 1, 1), 100);
+                mesh.scale.set(1, 1, 1);
+                mesh.material.opacity = 0.1;
             }, 100);
 
-            // 門板震動特效
             const doorContainer = document.getElementById('container');
             doorContainer.classList.remove('vibrate');
             void doorContainer.offsetWidth;
             doorContainer.classList.add('vibrate');
 
-            // 浮空文字
             createFloatText(x, y, x < window.innerWidth/2 ? `💰 +${gain}` : `🍀 +${gain}`);
-
-            if (navigator.vibrate) navigator.vibrate(50);
+            if (navigator.vibrate) navigator.vibrate(55);
             playPatSound();
         }
 
@@ -333,9 +383,9 @@
             const actx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = actx.createOscillator();
             const g = actx.createGain();
-            osc.frequency.setValueAtTime(240, actx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(80, actx.currentTime + 0.1);
-            g.gain.setValueAtTime(0.5, actx.currentTime);
+            osc.frequency.setValueAtTime(260, actx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(70, actx.currentTime + 0.1);
+            g.gain.setValueAtTime(0.4, actx.currentTime);
             g.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.1);
             osc.connect(g); g.connect(actx.destination);
             osc.start(); osc.stop(actx.currentTime + 0.1);
@@ -352,23 +402,18 @@
             setTimeout(() => div.remove(), 800);
         }
 
-        function showLotto() {
-            const container = document.getElementById('ballContainer');
-            container.innerHTML = '';
+        // --- 改為顯示運勢指引 ---
+        function showFortune() {
             document.getElementById('lottoModal').style.display = 'flex';
-            const isBig = Math.random() > 0.5;
-            document.getElementById('lottoName').innerText = isBig ? "✨ 大樂透 推論 ✨" : "🔥 威力彩 推論 🔥";
-            let nums = [];
-            while(nums.length < 6) {
-                let n = Math.floor(Math.random() * (isBig ? 49 : 38)) + 1;
-                if(!nums.includes(n)) nums.push(n);
-            }
-            nums.sort((a,b)=>a-b).forEach(n => {
-                const b = document.createElement('div');
-                b.className = 'ball';
-                b.innerText = n < 10 ? '0'+n : n;
-                container.appendChild(b);
-            });
+            
+            // 隨機選取運勢與小物
+            const tip = horseYearTips[Math.floor(Math.random() * horseYearTips.length)];
+            const item = luckyItems[Math.floor(Math.random() * luckyItems.length)];
+            
+            document.getElementById('fortuneTip').innerText = tip;
+            document.getElementById('luckyItem').innerText = item;
+
+            // 顯示隨機歷史典故
             const story = clappingStories[Math.floor(Math.random() * clappingStories.length)];
             document.getElementById('storyTitle').innerText = story.title;
             document.getElementById('storyContent').innerText = story.content;
@@ -383,6 +428,8 @@
 
         function animate() {
             requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+            if (mixer) mixer.update(delta);
             if (controls) controls.update();
             renderer.render(scene, camera);
         }
