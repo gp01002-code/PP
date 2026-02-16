@@ -19,7 +19,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* 全域標楷體設定 */
+        /* 全域強制標楷體 */
         body, .couplet, .score-display, .modal, .historical-story, .lotto-btn, button, .fortune-container {
             font-family: "標楷體", "DFKai-SB", "Kaiti TC", serif;
         }
@@ -57,15 +57,14 @@
             background-color: transparent;
         }
 
-        /* 門板受擊震動特效 */
+        /* 受擊震動 */
         @keyframes container-vibrate {
             0% { transform: scale(1); }
-            50% { transform: scale(0.98) translate(2px, 2px); }
+            50% { transform: scale(0.985) translate(1.5px, 1.5px); }
             100% { transform: scale(1); }
         }
         .vibrate { animation: container-vibrate 0.12s ease-out; }
 
-        /* 3D 渲染區域 */
         #three-canvas {
             position: absolute;
             top: 0;
@@ -82,10 +81,10 @@
             position: absolute;
             background: var(--primary-red);
             color: var(--gold);
-            padding: 10px 6px;
+            padding: 10px 5px;
             font-weight: bold;
             border: 2px solid var(--gold);
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             text-align: center;
             z-index: 20;
             white-space: nowrap;
@@ -94,31 +93,32 @@
             transition: transform 0.1s;
         }
         
-        .top-scroll { top: 15px; width: 200px; left: 50%; transform: translateX(-50%); }
+        .top-scroll { top: 12px; width: 170px; left: 50%; transform: translateX(-50%); }
         .left-side { left: 8px; top: 85px; writing-mode: vertical-rl; }
         .right-side { right: 8px; top: 85px; writing-mode: vertical-rl; }
 
         @keyframes couplet-shake {
             0% { transform: translate(0, 0) rotate(0deg); }
-            25% { transform: translate(3px, -3px) rotate(1deg); }
-            50% { transform: translate(-3px, 3px) rotate(-1deg); }
+            25% { transform: translate(2px, -2px) rotate(1deg); }
+            75% { transform: translate(-2px, 2px) rotate(-1deg); }
             100% { transform: translate(0, 0) rotate(0deg); }
         }
         @keyframes top-couplet-shake {
             0% { transform: translateX(-50%) translate(0, 0); }
-            25% { transform: translateX(-50%) translate(2px, -4px); }
+            25% { transform: translateX(-50%) translate(2px, -3px); }
+            75% { transform: translateX(-50%) translate(-2px, 3px); }
             100% { transform: translateX(-50%) translate(0, 0); }
         }
 
-        .shake-active { animation: couplet-shake 0.2s ease-in-out; }
-        .top-shake-active { animation: top-couplet-shake 0.2s ease-in-out; }
+        .shake-active { animation: couplet-shake 0.15s ease-in-out; }
+        .top-shake-active { animation: top-couplet-shake 0.15s ease-in-out; }
 
         @media (max-width: 400px) {
-            .couplet { font-size: 1rem; padding: 6px 4px; }
+            .couplet { font-size: 0.9rem; padding: 6px 4px; }
             .left-side, .right-side { top: 75px; }
         }
 
-        /* 浮空計分板 */
+        /* 計分板 */
         .score-display {
             position: absolute;
             bottom: 25px;
@@ -127,23 +127,22 @@
             text-align: center;
             z-index: 25;
             font-weight: bold;
-            text-shadow: 2px 2px 6px rgba(0,0,0,1), 0 0 12px rgba(211,47,47,0.8);
+            text-shadow: 2px 2px 6px rgba(0,0,0,1);
             pointer-events: none;
         }
         #score-num { font-size: 3rem; color: #fff; display: block; line-height: 1.2; margin-top: 5px; }
 
-        /* 領取按鈕 */
+        /* 按鈕 */
         .lotto-btn {
             position: absolute;
-            bottom: 130px;
+            bottom: 125px;
             right: 15px;
-            padding: 12px 20px;
+            padding: 10px 18px;
             background: linear-gradient(to bottom, #ffd700, #ffa000);
             color: #8b0000;
             border: 2px solid #8b0000;
             border-radius: 25px;
             font-weight: 900;
-            font-size: 1.1rem;
             cursor: pointer;
             display: none;
             z-index: 30;
@@ -163,7 +162,7 @@
             align-items: center;
             flex-direction: column;
             color: var(--gold);
-            padding: 40px 20px;
+            padding: 30px 15px;
             overflow-y: auto;
             text-align: center;
         }
@@ -178,43 +177,46 @@
             max-width: 340px;
         }
 
-        /* 密碼球排版：縮小並確保一列 */
+        /* 縮小密碼球排版，確保六個球一列 */
         .lucky-num-box {
             display: flex;
             justify-content: center;
-            flex-wrap: wrap; /* 允許換行，但透過 JS 控制特別號才換行 */
-            gap: 6px;
+            flex-wrap: wrap; 
+            gap: 5px;
             margin: 10px 0;
         }
         .lucky-num {
             background: radial-gradient(circle at 30% 30%, #fff, #ffd700);
             color: #8b0000;
-            width: 40px; /* 從 45 縮小 */
-            height: 40px;
+            width: 38px; /* 再次縮小確保手機一列 */
+            height: 38px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 0.9rem; /* 漢字較寬，字體調小 */
-            box-shadow: 0 0 8px gold;
+            font-size: 0.85rem; /* 漢字較寬，縮小字體 */
+            box-shadow: 0 0 8px rgba(255,215,0,0.6);
+        }
+        /* 特別號換行，但圓圈大小與其他一致 */
+        .special-container {
+            flex-basis: 100%;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .lucky-num.special {
             background: radial-gradient(circle at 30% 30%, #fff, #ff4444);
             color: #fff;
-            margin-top: 10px;
-            flex-basis: 100%; /* 強制換行 */
-            width: 45px;
-            height: 45px;
-            margin-left: auto;
-            margin-right: auto;
+            width: 38px;
+            height: 38px;
+            margin-top: 5px;
         }
         .special-label {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             color: #ff4444;
             display: block;
-            margin-bottom: 5px;
-            flex-basis: 100%;
         }
 
         .historical-story {
@@ -223,7 +225,7 @@
             border-radius: 12px;
             margin: 10px 0;
             text-align: left;
-            font-size: 1rem;
+            font-size: 0.95rem;
             max-width: 340px;
             color: #f5e6d3;
             line-height: 1.6;
@@ -233,7 +235,7 @@
         .float-text {
             position: absolute;
             font-weight: 900;
-            font-size: 2.8rem;
+            font-size: 2.5rem;
             pointer-events: none;
             z-index: 100;
             animation: float-up 0.8s ease-out forwards;
@@ -241,14 +243,14 @@
         }
         @keyframes float-up {
             0% { transform: translateY(0) scale(0.5); opacity: 0; }
-            100% { transform: translateY(-180px) scale(1.8) rotate(10deg); opacity: 0; }
+            100% { transform: translateY(-180px) scale(1.6) rotate(10deg); opacity: 0; }
         }
     </style>
 </head>
 <body>
 
     <div id="container">
-        <!-- 春聯已更新為全新古典內容 -->
+        <!-- 春聯內容 -->
         <div id="topCouplet" class="couplet top-scroll">萬事馬到功成</div>
         <div id="leftCouplet" class="couplet left-side">拍拍駿馬進斗金</div>
         <div id="rightCouplet" class="couplet right-side">轉動乾坤行大運</div>
@@ -264,13 +266,13 @@
         <button id="lottoBtn" class="lotto-btn" onclick="showFortune()">領取運勢指引</button>
     </div>
 
-    <!-- 幸運運勢彈窗 -->
+    <!-- 幸運運勢彈窗 (已移除標題燈籠) -->
     <div id="lottoModal" class="modal">
-        <h2 style="font-size: 2.2rem; color: var(--gold); margin-top: 10px;">拍馬顯靈．馬年大吉</h2>
+        <h2 style="font-size: 2.2rem; color: var(--gold); margin: 10px 0;">拍馬顯靈．馬年大吉</h2>
         
         <div class="fortune-container">
             <b style="color:var(--gold); font-size: 1.2rem;">✨ 馬年開運指引 ✨</b>
-            <p id="fortuneTip" style="color: #fff; line-height: 1.6; margin: 15px 0; font-size: 1.1rem;"></p>
+            <p id="fortuneTip" style="color: #fff; line-height: 1.6; margin: 15px 0; font-size: 1rem;"></p>
             <hr style="border: 0.5px solid rgba(255,215,0,0.3); margin: 10px 0;">
             <b style="color:var(--gold);">🍀 本週開運密碼 🍀</b>
             <div id="luckyNumsBox" class="lucky-num-box"></div>
@@ -281,7 +283,7 @@
             <span id="storyContent"></span>
         </div>
 
-        <button onclick="resetGame()" style="margin-top:20px; padding:15px 70px; border-radius:35px; background:var(--primary-red); color:white; border:2px solid var(--gold); font-weight:bold; font-size:1.3rem; cursor:pointer;">謝大師指點</button>
+        <button onclick="resetGame()" style="margin-top:20px; padding:15px 60px; border-radius:35px; background:var(--primary-red); color:white; border:2px solid var(--gold); font-weight:bold; font-size:1.3rem; cursor:pointer;">謝大師指點</button>
     </div>
 
     <script>
@@ -289,35 +291,38 @@
         let score = 0;
         const buttSensors = []; 
 
-        // 數字轉中文漢字輔助函式
-        function toChineseNum(num) {
+        // 數字轉漢字輔助：支援正式版(財氣用)與縮寫版(密碼球用)
+        function toChineseNum(num, isCompact = false) {
             if (num === 0) return "零";
             const chnNumChar = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
-            const chnUnitChar = ["", "十", "百", "千"];
-            let strIns = '', chnStr = '';
-            let unitPos = 0;
-            let zero = true;
             
-            // 針對 1-99 進行優化 (常規運勢號碼範圍)
-            if (num < 20 && num >= 10) {
-                return "十" + (num % 10 === 0 ? "" : chnNumChar[num % 10]);
+            // 縮寫邏輯：21 -> 二一
+            if (isCompact && num >= 10) {
+                let tens = Math.floor(num / 10);
+                let units = num % 10;
+                return chnNumChar[tens] + chnNumChar[units];
+            } else if (isCompact && num < 10) {
+                return chnNumChar[num];
             }
 
-            while (num > 0) {
-                let v = num % 10;
+            // 正式版邏輯：123 -> 一百二三 (適用於累積財氣)
+            const chnUnitChar = ["", "十", "百", "千"];
+            let chnStr = '', unitPos = 0, zero = true;
+            
+            if (num < 20 && num >= 10) return "十" + (num % 10 === 0 ? "" : chnNumChar[num % 10]);
+
+            let tempNum = num;
+            while (tempNum > 0) {
+                let v = tempNum % 10;
                 if (v === 0) {
-                    if (!zero) {
-                        zero = true;
-                        chnStr = chnNumChar[v] + chnStr;
-                    }
+                    if (!zero) { zero = true; chnStr = chnNumChar[v] + chnStr; }
                 } else {
                     zero = false;
-                    strIns = chnNumChar[v];
-                    strIns += chnUnitChar[unitPos];
+                    let strIns = chnNumChar[v] + chnUnitChar[unitPos];
                     chnStr = strIns + chnStr;
                 }
                 unitPos++;
-                num = Math.floor(num / 10);
+                tempNum = Math.floor(tempNum / 10);
             }
             return chnStr;
         }
@@ -372,8 +377,7 @@
                 horseModel = gltf.scene;
                 if (gltf.animations && gltf.animations.length > 0) {
                     mixer = new THREE.AnimationMixer(horseModel);
-                    const runAction = mixer.clipAction(gltf.animations[0]); 
-                    runAction.play();
+                    mixer.clipAction(gltf.animations[0]).play();
                 }
                 createButtSensors();
                 const box = new THREE.Box3().setFromObject(horseModel);
@@ -418,7 +422,6 @@
         function onPatSuccess(mesh, x, y) {
             const gain = Math.floor(Math.random() * 10) + 1;
             score += gain;
-            // 更新累積財氣為中文
             document.getElementById('score-num').innerText = toChineseNum(score);
             if (score >= 300) document.getElementById('lottoBtn').style.display = 'block';
 
@@ -426,10 +429,8 @@
             mesh.material.opacity = 0.5;
             setTimeout(() => { mesh.scale.set(1, 1, 1); mesh.material.opacity = 0.1; }, 100);
 
-            const doorContainer = document.getElementById('container');
-            doorContainer.classList.remove('vibrate');
-            void doorContainer.offsetWidth;
-            doorContainer.classList.add('vibrate');
+            const container = document.getElementById('container');
+            container.classList.remove('vibrate'); void container.offsetWidth; container.classList.add('vibrate');
 
             const tc = document.getElementById('topCouplet');
             const lc = document.getElementById('leftCouplet');
@@ -471,29 +472,30 @@
             const box = document.getElementById('luckyNumsBox');
             box.innerHTML = '';
             
-            // 隨機產生 6 個普通密碼 + 1 個特別號
             let nums = [];
             while(nums.length < 6) {
                 let n = Math.floor(Math.random() * 49) + 1;
                 if(!nums.includes(n)) nums.push(n);
             }
             nums.sort((a,b)=>a-b).forEach(n => {
-                const span = document.createElement('div');
-                span.className = 'lucky-num';
-                span.innerText = toChineseNum(n);
-                box.appendChild(span);
+                const div = document.createElement('div');
+                div.className = 'lucky-num';
+                div.innerText = toChineseNum(n, true); // 縮寫版：二一
+                box.appendChild(div);
             });
 
-            // 加入特別號與換行標籤
+            const specialContainer = document.createElement('div');
+            specialContainer.className = 'special-container';
             const label = document.createElement('div');
             label.className = 'special-label';
             label.innerText = "── 特別守護碼 ──";
-            box.appendChild(label);
+            specialContainer.appendChild(label);
             
             const special = document.createElement('div');
             special.className = 'lucky-num special';
-            special.innerText = toChineseNum(Math.floor(Math.random() * 8) + 1);
-            box.appendChild(special);
+            special.innerText = toChineseNum(Math.floor(Math.random() * 8) + 1, true);
+            specialContainer.appendChild(special);
+            box.appendChild(specialContainer);
 
             const story = clappingStories[Math.floor(Math.random() * clappingStories.length)];
             document.getElementById('storyTitle').innerText = story.title;
